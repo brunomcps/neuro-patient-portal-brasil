@@ -48,6 +48,59 @@ const Dashboard = () => {
     link: "https://meet.google.com/abc-defg-hij"
   };
 
+  const sessoes = [
+    {
+      id: 1,
+      nome: "Sessão Inicial",
+      descricao: "Entrevista inicial para coleta de dados básicos, histórico clínico e definição dos objetivos da avaliação.",
+      orientacoes: "Chegue 15 minutos antes. Traga documentos de identificação e relatórios médicos anteriores.",
+      responsavel: "Dr. João Silva",
+      ordem: 1,
+      status: "concluido",
+      data: "2024-01-10T14:00:00"
+    },
+    {
+      id: 2,
+      nome: "Avaliação Cognitiva",
+      descricao: "Aplicação de testes neuropsicológicos para avaliação das funções cognitivas básicas.",
+      orientacoes: "Durma bem na noite anterior. Tome café da manhã normalmente. Traga óculos se usar.",
+      responsavel: "Dr. João Silva",
+      ordem: 2,
+      status: "concluido",
+      data: "2024-01-17T14:00:00"
+    },
+    {
+      id: 3,
+      nome: "Testes Específicos",
+      descricao: "Aplicação de testes específicos baseados nas hipóteses diagnósticas levantadas.",
+      orientacoes: "Mantenha medicação regular. Evite bebidas alcoólicas 24h antes.",
+      responsavel: "Dr. João Silva",
+      ordem: 3,
+      status: "pendente",
+      data: "2024-02-15T14:00:00"
+    },
+    {
+      id: 4,
+      nome: "Avaliação Comportamental",
+      descricao: "Observação e avaliação de aspectos comportamentais e emocionais.",
+      orientacoes: "Sessão com duração estendida. Traga lanche leve se necessário.",
+      responsavel: "Dra. Maria Santos",
+      ordem: 4,
+      status: "pendente",
+      data: "2024-02-22T14:00:00"
+    },
+    {
+      id: 5,
+      nome: "Sessão de Alinhamento Diagnóstico",
+      descricao: "Revisão dos resultados, discussão dos achados e entrega do relatório final.",
+      orientacoes: "Compareça acompanhado de familiar se desejar. Sessão para esclarecimento de dúvidas.",
+      responsavel: "Dr. João Silva",
+      ordem: 5,
+      status: "pendente",
+      data: "2024-03-01T14:00:00"
+    }
+  ];
+
   const questionarios = [
     { 
       id: 1, 
@@ -122,17 +175,7 @@ const Dashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Timeline */}
-            <Card className="border-green-100">
-              <CardHeader>
-                <CardTitle>Linha do Tempo da Avaliação</CardTitle>
-                <CardDescription>
-                  Acompanhe cada etapa do seu processo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TimeLine />
-              </CardContent>
-            </Card>
+            <TimeLine sessoes={sessoes} />
 
             {/* Questionários */}
             <Card className="border-purple-100">

@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminPacientes from "./pages/AdminPacientes";
+import AdminPacienteEdit from "./pages/AdminPacienteEdit";
 import AdminAgendamentos from "./pages/AdminAgendamentos";
 import AdminRelatorios from "./pages/AdminRelatorios";
 import AdminQuestionarios from "./pages/AdminQuestionarios";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/pacientes" element={<AdminPacientes />} />
+          <Route path="/admin/pacientes/edit/:id" element={<AdminPacienteEdit />} />
           <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
           <Route path="/admin/relatorios" element={<AdminRelatorios />} />
           <Route path="/admin/questionarios" element={<AdminQuestionarios />} />

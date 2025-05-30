@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,10 +112,7 @@ const AdminPacientes = () => {
   };
 
   const handleEdit = (id: number) => {
-    toast({
-      title: "Editar paciente",
-      description: `Funcionalidade de edição será implementada.`,
-    });
+    navigate(`/admin/pacientes/edit/${id}`);
   };
 
   const handleDelete = (id: number) => {
@@ -125,6 +121,10 @@ const AdminPacientes = () => {
       description: "Paciente foi removido do sistema.",
       variant: "destructive"
     });
+  };
+
+  const handleView = (id: number) => {
+    navigate(`/admin/pacientes/edit/${id}`);
   };
 
   if (!user) return null;
@@ -273,7 +273,11 @@ const AdminPacientes = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleView(paciente.id)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button 
