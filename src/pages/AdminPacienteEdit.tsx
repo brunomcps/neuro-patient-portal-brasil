@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,6 +149,36 @@ const AdminPacienteEdit = () => {
   const [showAddPagamento, setShowAddPagamento] = useState(false);
   const [laudoFile, setLaudoFile] = useState<File | null>(null);
 
+  // Estados dos formulários
+  const [formSessao, setFormSessao] = useState({
+    nome: "",
+    data: "",
+    horario: "",
+    link_reuniao: "",
+    observacoes: ""
+  });
+
+  const [formQuestionario, setFormQuestionario] = useState({
+    questionario_id: "",
+    link_paciente: ""
+  });
+
+  const [formPagamento, setFormPagamento] = useState({
+    descricao: "",
+    valor: "",
+    data_vencimento: ""
+  });
+
+  // Lista de questionários disponíveis
+  const questionariosDisponiveis = [
+    { id: 1, nome: "Formulário Inicial" },
+    { id: 2, nome: "Escala SRS-2" },
+    { id: 3, nome: "BDEFS" },
+    { id: 4, nome: "WISC-V" },
+    { id: 5, nome: "TEA-Ch" },
+    { id: 6, nome: "Escala de Ansiedade Beck" }
+  ];
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (!userData) {
@@ -175,6 +204,78 @@ const AdminPacienteEdit = () => {
         description: "Informações do paciente atualizadas com sucesso.",
       });
     }, 1000);
+  };
+
+  const handleAddSessao = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const novaSessao = {
+      id: sessoesPlanejadas.length + 1,
+      nome: formSessao.nome,
+      data: formSessao.data,
+      horario: formSessao.horario,
+      status: "agendada",
+      link_reuniao: formSessao.link_reuniao,
+      observacoes: formSessao.observacoes
+    };
+
+    setSessoesPlanejadas([...sessoesPlanejadas, novaSessao]);
+    setFormSessao({ nome: "", data: "", horario: "", link_reuniao: "", observacoes: "" });
+    setShowAddSessao(false);
+    
+    toast({
+      title: "Sessão adicionada",
+      description: "Nova sessão foi planejada com sucesso.",
+    });
+  };
+
+  const handleAddQuestionario = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const questionarioSelecionado = questionariosDisponiveis.find(
+      q => q.id.toString() === formQuestionario.questionario_id
+    );
+    
+    if (!questionarioSelecionado) return;
+
+    const novoQuestionario = {
+      id: questionariosAtribuidos.length + 1,
+      nome: questionarioSelecionado.nome,
+      link_paciente: formQuestionario.link_paciente,
+      status: "pendente",
+      data_conclusao: null
+    };
+
+    setQuestionariosAtribuidos([...questionariosAtribuidos, novoQuestionario]);
+    setFormQuestionario({ questionario_id: "", link_paciente: "" });
+    setShowAddQuestionario(false);
+    
+    toast({
+      title: "Questionário atribuído",
+      description: "Questionário foi atribuído ao paciente com sucesso.",
+    });
+  };
+
+  const handleAddPagamento = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const novoPagamento = {
+      id: pagamentos.length + 1,
+      descricao: formPagamento.descricao,
+      valor: parseFloat(formPagamento.valor),
+      data_vencimento: formPagamento.data_vencimento,
+      status: "pendente",
+      data_pagamento: null
+    };
+
+    setPagamentos([...pagamentos, novoPagamento]);
+    setFormPagamento({ descricao: "", valor: "", data_vencimento: "" });
+    setShowAddPagamento(false);
+    
+    toast({
+      title: "Pagamento adicionado",
+      description: "Nova cobrança foi criada com sucesso.",
+    });
   };
 
   const handleUploadLaudo = () => {
@@ -349,6 +450,82 @@ const AdminPacienteEdit = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {showAddSessao && (
+                  <Card className="mb-6 border-blue-100">
+                    <CardHeader>
+                      <CardTitle>Nova Sessão</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleAddSessao} className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="nome-sessao">Nome da Sessão</Label>
+                            <Input
+                              id="nome-sessao"
+                              value={formSessao.nome}
+                              onChange={(e) => setFormSessao({...formSessao, nome: e.target.value})}
+                              placeholder="Ex: Avaliação WISC-V"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="data-sessao">Data</Label>
+                            <Input
+                              id="data-sessao"
+                              type="date"
+                              value={formSessao.data}
+                              onChange={(e) => setFormSessao({...formSessao, data: e.target.value})}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="horario-sessao">Horário</Label>
+                            <Input
+                              id="horario-sessao"
+                              type="time"
+                              value={formSessao.horario}
+                              onChange={(e) => setFormSessao({...formSessao, horario: e.target.value})}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="link-sessao">Link da Reunião</Label>
+                            <Input
+                              id="link-sessao"
+                              type="url"
+                              value={formSessao.link_reuniao}
+                              onChange={(e) => setFormSessao({...formSessao, link_reuniao: e.target.value})}
+                              placeholder="https://meet.google.com/..."
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="observacoes-sessao">Observações</Label>
+                          <Textarea
+                            id="observacoes-sessao"
+                            value={formSessao.observacoes}
+                            onChange={(e) => setFormSessao({...formSessao, observacoes: e.target.value})}
+                            placeholder="Observações sobre a sessão..."
+                            rows={3}
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                            Adicionar Sessão
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setShowAddSessao(false)}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -416,6 +593,56 @@ const AdminPacienteEdit = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {showAddQuestionario && (
+                  <Card className="mb-6 border-purple-100">
+                    <CardHeader>
+                      <CardTitle>Atribuir Questionário</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleAddQuestionario} className="space-y-4">
+                        <div>
+                          <Label htmlFor="questionario-select">Questionário</Label>
+                          <Select value={formQuestionario.questionario_id} onValueChange={(value) => setFormQuestionario({...formQuestionario, questionario_id: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um questionário" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {questionariosDisponiveis.map((questionario) => (
+                                <SelectItem key={questionario.id} value={questionario.id.toString()}>
+                                  {questionario.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="link-questionario">Link de Acesso do Paciente</Label>
+                          <Input
+                            id="link-questionario"
+                            type="url"
+                            value={formQuestionario.link_paciente}
+                            onChange={(e) => setFormQuestionario({...formQuestionario, link_paciente: e.target.value})}
+                            placeholder="https://forms.google.com/..."
+                            required
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+                            Atribuir Questionário
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setShowAddQuestionario(false)}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -484,6 +711,64 @@ const AdminPacienteEdit = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {showAddPagamento && (
+                  <Card className="mb-6 border-green-100">
+                    <CardHeader>
+                      <CardTitle>Nova Cobrança</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleAddPagamento} className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="descricao-pagamento">Descrição</Label>
+                            <Input
+                              id="descricao-pagamento"
+                              value={formPagamento.descricao}
+                              onChange={(e) => setFormPagamento({...formPagamento, descricao: e.target.value})}
+                              placeholder="Ex: Avaliação Neuropsicológica"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="valor-pagamento">Valor (R$)</Label>
+                            <Input
+                              id="valor-pagamento"
+                              type="number"
+                              step="0.01"
+                              value={formPagamento.valor}
+                              onChange={(e) => setFormPagamento({...formPagamento, valor: e.target.value})}
+                              placeholder="250.00"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="vencimento-pagamento">Data de Vencimento</Label>
+                            <Input
+                              id="vencimento-pagamento"
+                              type="date"
+                              value={formPagamento.data_vencimento}
+                              onChange={(e) => setFormPagamento({...formPagamento, data_vencimento: e.target.value})}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                            Adicionar Cobrança
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => setShowAddPagamento(false)}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Table>
                   <TableHeader>
                     <TableRow>
