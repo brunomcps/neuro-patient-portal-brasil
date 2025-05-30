@@ -1,21 +1,20 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Brain, 
-  Calendar, 
-  FileText, 
-  Download, 
   Clock, 
   CheckCircle, 
+  Calendar, 
+  Download, 
+  MessageSquare, 
   AlertCircle,
-  Phone,
-  MessageSquare,
-  ExternalLink
+  FileText,
+  ClipboardList
 } from "lucide-react";
 import Header from "@/components/Header";
 import TimeLine from "@/components/TimeLine";
@@ -30,69 +29,58 @@ const Dashboard = () => {
       navigate("/login");
       return;
     }
-    setUser(JSON.parse(userData));
+    
+    const parsedUser = JSON.parse(userData);
+    if (parsedUser.tipo_usuario === "administrador") {
+      navigate("/admin");
+      return;
+    }
+    
+    setUser(parsedUser);
   }, [navigate]);
 
-  const sessoes = [
-    {
-      id: 1,
-      nome: "Sessão Inicial",
-      descricao: "Primeira sessão para conhecimento do paciente e coleta de informações iniciais.",
-      orientacoes: "Traga documentos médicos anteriores e seja pontual.",
-      responsavel: "Dr. João Santos",
-      ordem: 1,
-      status: "concluido",
-      data: "2024-01-15"
+  // Dados de demonstração
+  const progressoGeral = 60; // 3 de 5 etapas concluídas
+  const proximaConsulta = {
+    data: "15 de Fevereiro, 2024",
+    horario: "14:00",
+    tipo: "Sessão de Avaliação Comportamental",
+    link: "https://meet.google.com/abc-defg-hij"
+  };
+
+  const questionarios = [
+    { 
+      id: 1, 
+      nome: "Formulário Inicial", 
+      status: "concluido", 
+      prazo: "Concluído",
+      link: "https://forms.google.com/..."
     },
-    {
-      id: 2,
-      nome: "Sessão de Testes Cognitivos",
-      descricao: "Aplicação de testes específicos para avaliação cognitiva.",
-      orientacoes: "Tenha uma boa noite de sono antes da sessão.",
-      responsavel: "Dra. Maria Lima",
-      ordem: 2,
-      status: "concluido",
-      data: "2024-01-22"
+    { 
+      id: 2, 
+      nome: "Escala SRS-2", 
+      status: "concluido", 
+      prazo: "Concluído",
+      link: "https://forms.google.com/..."
     },
-    {
-      id: 3,
-      nome: "Sessão de Avaliação Comportamental",
-      descricao: "Avaliação de aspectos comportamentais e emocionais.",
-      orientacoes: "Prepare-se para discussões sobre comportamento e emoções.",
-      responsavel: "Dr. João Santos",
-      ordem: 3,
-      status: "pendente",
-      data: "2024-02-05"
+    { 
+      id: 3, 
+      nome: "BDEFS", 
+      status: "pendente", 
+      prazo: "Até 20/02/2024",
+      link: "https://forms.google.com/..."
     },
-    {
-      id: 4,
-      nome: "Sessão de Testes Complementares",
-      descricao: "Aplicação de testes complementares para finalizar a avaliação.",
-      orientacoes: "Mantenha-se relaxado e responda naturalmente.",
-      responsavel: "Dra. Ana Costa",
-      ordem: 4,
-      status: "pendente",
-      data: "2024-02-12"
-    },
-    {
-      id: 5,
-      nome: "Sessão de Alinhamento Diagnóstico",
-      descricao: "Apresentação e discussão dos resultados da avaliação.",
-      orientacoes: "Prepare suas dúvidas sobre o processo.",
-      responsavel: "Dr. João Santos",
-      ordem: 5,
-      status: "pendente",
-      data: "2024-02-19"
+    { 
+      id: 4, 
+      nome: "Questionário Complementar", 
+      status: "pendente", 
+      prazo: "Até 25/02/2024",
+      link: "https://forms.google.com/..."
     }
   ];
 
-  const formularios = [
-    { id: 1, nome: "Formulário Inicial", status: "concluido", link: "#" },
-    { id: 2, nome: "Escala SRS-2", status: "pendente", link: "#" },
-    { id: 3, nome: "Escala BDEFS", status: "pendente", link: "#" }
-  ];
-
-  const progressoGeral = (sessoes.filter(s => s.status === "concluido").length / sessoes.length) * 100;
+  const prazoLaudo = "28 de Fevereiro, 2024";
+  const agendamentoDevolutiva = "A partir de 01 de Março, 2024";
 
   if (!user) return null;
 
@@ -107,7 +95,7 @@ const Dashboard = () => {
             Olá, {user.nome}!
           </h1>
           <p className="text-gray-600">
-            Acompanhe o progresso da sua avaliação neuropsicológica
+            Acompanhe seu processo de avaliação neuropsicológica
           </p>
         </div>
 
@@ -115,40 +103,18 @@ const Dashboard = () => {
         <Card className="mb-8 border-blue-100">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Brain className="h-5 w-5 mr-2 text-blue-600" />
+              <CheckCircle className="h-5 w-5 mr-2 text-blue-600" />
               Progresso da Avaliação
             </CardTitle>
+            <CardDescription>
+              Você completou {Math.round((progressoGeral / 100) * 5)} de 5 etapas
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Progresso geral</span>
-                  <span>{Math.round(progressoGeral)}%</span>
-                </div>
-                <Progress value={progressoGeral} className="h-3" />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {sessoes.filter(s => s.status === "concluido").length}
-                  </div>
-                  <div className="text-sm text-gray-600">Sessões Concluídas</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {sessoes.filter(s => s.status === "pendente").length}
-                  </div>
-                  <div className="text-sm text-gray-600">Sessões Pendentes</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {formularios.filter(f => f.status === "concluido").length}/{formularios.length}
-                  </div>
-                  <div className="text-sm text-gray-600">Formulários</div>
-                </div>
-              </div>
-            </div>
+            <Progress value={progressoGeral} className="mb-4" />
+            <p className="text-sm text-gray-600">
+              {progressoGeral}% concluído - Continue assim! 🎉
+            </p>
           </CardContent>
         </Card>
 
@@ -156,114 +122,161 @@ const Dashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Timeline */}
-            <TimeLine sessoes={sessoes} />
-
-            {/* Formulários */}
             <Card className="border-green-100">
               <CardHeader>
+                <CardTitle>Linha do Tempo da Avaliação</CardTitle>
+                <CardDescription>
+                  Acompanhe cada etapa do seu processo
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TimeLine />
+              </CardContent>
+            </Card>
+
+            {/* Questionários */}
+            <Card className="border-purple-100">
+              <CardHeader>
                 <CardTitle className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2 text-green-600" />
-                  Formulários e Escalas
+                  <ClipboardList className="h-5 w-5 mr-2 text-purple-600" />
+                  Questionários
                 </CardTitle>
                 <CardDescription>
-                  Complete os formulários necessários para sua avaliação
+                  Formulários, escalas e testes para preenchimento
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {formularios.map((formulario) => (
-                    <div key={formulario.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{formulario.nome}</h4>
-                          <Badge 
-                            variant={formulario.status === "concluido" ? "default" : "secondary"}
-                            className={formulario.status === "concluido" ? "bg-green-100 text-green-800" : ""}
-                          >
-                            {formulario.status === "concluido" ? "Concluído" : "Pendente"}
-                          </Badge>
-                        </div>
+                  {questionarios.map((questionario) => (
+                    <div key={questionario.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800">{questionario.nome}</h4>
+                        <p className="text-sm text-gray-600">Prazo: {questionario.prazo}</p>
                       </div>
-                      <Button 
-                        size="sm" 
-                        variant={formulario.status === "concluido" ? "outline" : "default"}
-                        className={formulario.status === "pendente" ? "bg-green-600 hover:bg-green-700" : ""}
-                      >
-                        {formulario.status === "concluido" ? "Visualizar" : "Preencher"}
-                        <ExternalLink className="h-4 w-4 ml-2" />
-                      </Button>
+                      <div className="flex items-center space-x-3">
+                        <Badge 
+                          variant={questionario.status === "concluido" ? "default" : "secondary"}
+                          className={questionario.status === "concluido" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
+                        >
+                          {questionario.status === "concluido" ? "Concluído" : "Pendente"}
+                        </Badge>
+                        {questionario.status === "pendente" && (
+                          <Button size="sm" asChild>
+                            <a href={questionario.link} target="_blank" rel="noopener noreferrer">
+                              Preencher
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            {/* Quick Actions */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-blue-100">
+                <CardContent className="p-6 text-center">
+                  <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="font-semibold text-gray-800 mb-2">Agendamentos</h3>
+                  <p className="text-sm text-gray-600 mb-4">Visualize e gerencie suas consultas</p>
+                  <Button size="sm" className="w-full">
+                    Ver Agenda
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-green-100">
+                <CardContent className="p-6 text-center">
+                  <FileText className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <h3 className="font-semibold text-gray-800 mb-2">Recursos</h3>
+                  <p className="text-sm text-gray-600 mb-4">Dicas e informações úteis</p>
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => navigate("/recursos")}
+                  >
+                    Acessar
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card className="border-purple-100">
-              <CardHeader>
-                <CardTitle className="text-lg">Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Agendar Sessão
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Contato WhatsApp
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar Laudo
-                </Button>
-              </CardContent>
-            </Card>
-
             {/* Next Appointment */}
-            <Card className="border-orange-100">
+            <Card className="border-blue-100">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-orange-600" />
-                  Próximo Agendamento
+                  <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+                  Próxima Consulta
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-4">
-                  <div className="text-lg font-semibold text-gray-800">05/02/2024</div>
-                  <div className="text-sm text-gray-600">14:00 - Sessão de Avaliação Comportamental</div>
-                  <div className="text-sm text-gray-500 mt-2">Dra. Maria Lima</div>
-                  <Button size="sm" className="mt-3" variant="outline">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Link da Sessão
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-gray-800">{proximaConsulta.data}</p>
+                    <p className="text-sm text-gray-600 flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {proximaConsulta.horario}
+                    </p>
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">{proximaConsulta.tipo}</p>
+                    <Button size="sm" variant="outline" className="w-full mt-2" asChild>
+                      <a href={proximaConsulta.link} target="_blank" rel="noopener noreferrer">
+                        Acessar Consulta
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Important Dates */}
+            <Card className="border-orange-100">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <AlertCircle className="h-5 w-5 mr-2 text-orange-600" />
+                  Datas Importantes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-orange-50 rounded-lg">
+                  <p className="text-sm font-medium text-orange-800">Prazo do Laudo</p>
+                  <p className="text-sm text-orange-600">{prazoLaudo}</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm font-medium text-green-800">Agendamento da Devolutiva</p>
+                  <p className="text-sm text-green-600">{agendamentoDevolutiva}</p>
+                  <Button size="sm" variant="outline" className="w-full mt-2">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contatar Secretária
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Important Info */}
-            <Card className="border-yellow-100 bg-yellow-50/50">
+            {/* Download Section */}
+            <Card className="border-gray-100">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
-                  <AlertCircle className="h-5 w-5 mr-2 text-yellow-600" />
-                  Informações Importantes
+                  <Download className="h-5 w-5 mr-2 text-gray-600" />
+                  Documentos
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm text-gray-700">
-                  <p><strong>Prazo para entrega do laudo:</strong></p>
-                  <p>10 dias após a última sessão</p>
+              <CardContent>
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Seu laudo estará disponível após a conclusão da avaliação
+                  </p>
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Laudo não disponível
+                  </Button>
                 </div>
-                <div className="text-sm text-gray-700">
-                  <p><strong>Agendamento da devolutiva:</strong></p>
-                  <p>Disponível a partir de 01/03/2024</p>
-                </div>
-                <Button size="sm" variant="outline" className="w-full">
-                  Ver Todos os Recursos
-                </Button>
               </CardContent>
             </Card>
           </div>

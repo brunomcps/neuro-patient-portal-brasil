@@ -16,7 +16,9 @@ import {
   BarChart3,
   Clock,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  ClipboardList,
+  UserCheck
 } from "lucide-react";
 import Header from "@/components/Header";
 
@@ -235,13 +237,17 @@ const AdminDashboard = () => {
             </Card>
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="border-green-100">
                 <CardContent className="p-6 text-center">
-                  <FileText className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Formulários</h3>
+                  <ClipboardList className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                  <h3 className="font-semibold text-gray-800 mb-2">Questionários</h3>
                   <p className="text-sm text-gray-600 mb-4">Gerenciar formulários e escalas</p>
-                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => navigate("/admin/questionarios")}
+                  >
                     Acessar
                   </Button>
                 </CardContent>
@@ -249,10 +255,25 @@ const AdminDashboard = () => {
 
               <Card className="border-purple-100">
                 <CardContent className="p-6 text-center">
-                  <Download className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+                  <UserCheck className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+                  <h3 className="font-semibold text-gray-800 mb-2">Sessões</h3>
+                  <p className="text-sm text-gray-600 mb-4">Gerenciar sessões de avaliação</p>
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    onClick={() => navigate("/admin/sessoes")}
+                  >
+                    Acessar
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-indigo-100">
+                <CardContent className="p-6 text-center">
+                  <Download className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
                   <h3 className="font-semibold text-gray-800 mb-2">Laudos</h3>
                   <p className="text-sm text-gray-600 mb-4">Upload e gerenciamento de laudos</p>
-                  <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700">
+                  <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Acessar
                   </Button>
                 </CardContent>
@@ -327,9 +348,14 @@ const AdminDashboard = () => {
                   <Users className="h-4 w-4 mr-2" />
                   Gerenciar Usuários
                 </Button>
-                <Button size="sm" variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Templates de Formulários
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate("/admin/questionarios")}
+                >
+                  <ClipboardList className="h-4 w-4 mr-2" />
+                  Templates de Questionários
                 </Button>
                 <Button 
                   size="sm" 
