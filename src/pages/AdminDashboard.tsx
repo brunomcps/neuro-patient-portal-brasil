@@ -169,7 +169,10 @@ const AdminDashboard = () => {
                     <Users className="h-5 w-5 mr-2 text-blue-600" />
                     Gerenciar Pacientes
                   </CardTitle>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => navigate("/admin/pacientes")}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Novo Paciente
                   </Button>
@@ -219,6 +222,14 @@ const AdminDashboard = () => {
                       </div>
                     ))}
                   </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate("/admin/pacientes")}
+                  >
+                    Ver Todos os Pacientes
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -252,7 +263,11 @@ const AdminDashboard = () => {
                   <BarChart3 className="h-12 w-12 text-orange-600 mx-auto mb-4" />
                   <h3 className="font-semibold text-gray-800 mb-2">Relatórios</h3>
                   <p className="text-sm text-gray-600 mb-4">Análises e estatísticas</p>
-                  <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700">
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                    onClick={() => navigate("/admin/relatorios")}
+                  >
                     Acessar
                   </Button>
                 </CardContent>
@@ -283,7 +298,12 @@ const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <Button size="sm" variant="outline" className="w-full mt-4">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full mt-4"
+                  onClick={() => navigate("/admin/agendamentos")}
+                >
                   Ver Todos os Agendamentos
                 </Button>
               </CardContent>
@@ -298,7 +318,12 @@ const AdminDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button size="sm" variant="outline" className="w-full justify-start">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate("/admin/pacientes")}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   Gerenciar Usuários
                 </Button>
@@ -306,7 +331,12 @@ const AdminDashboard = () => {
                   <FileText className="h-4 w-4 mr-2" />
                   Templates de Formulários
                 </Button>
-                <Button size="sm" variant="outline" className="w-full justify-start">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate("/admin/agendamentos")}
+                >
                   <Calendar className="h-4 w-4 mr-2" />
                   Configurar Agenda
                 </Button>
