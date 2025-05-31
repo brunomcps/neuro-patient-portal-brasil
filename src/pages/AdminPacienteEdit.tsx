@@ -171,12 +171,12 @@ const AdminPacienteEdit = () => {
 
   // Lista de questionários disponíveis
   const questionariosDisponiveis = [
-    { id: 1, nome: "Formulário Inicial" },
-    { id: 2, nome: "Escala SRS-2" },
-    { id: 3, nome: "BDEFS" },
-    { id: 4, nome: "WISC-V" },
-    { id: 5, nome: "TEA-Ch" },
-    { id: 6, nome: "Escala de Ansiedade Beck" }
+    { id: 1, nome: "Formulário Inicial", tipo: "Formulário" },
+    { id: 2, nome: "Escala SRS-2", tipo: "Escala" },
+    { id: 3, nome: "BDEFS", tipo: "Escala" },
+    { id: 4, nome: "WISC-V", tipo: "Teste Neuropsicológico" },
+    { id: 5, nome: "TEA-Ch", tipo: "Teste Neuropsicológico" },
+    { id: 6, nome: "Inventário Beck de Ansiedade", tipo: "Inventário" }
   ];
 
   useEffect(() => {
@@ -349,7 +349,7 @@ const AdminPacienteEdit = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dados">Dados Pessoais</TabsTrigger>
             <TabsTrigger value="sessoes">Sessões</TabsTrigger>
-            <TabsTrigger value="questionarios">Questionários</TabsTrigger>
+            <TabsTrigger value="questionarios">Testes e Questionários</TabsTrigger>
             <TabsTrigger value="pagamentos">Pagamentos</TabsTrigger>
             <TabsTrigger value="laudo">Laudo</TabsTrigger>
           </TabsList>
@@ -580,15 +580,15 @@ const AdminPacienteEdit = () => {
                   <div>
                     <CardTitle className="flex items-center">
                       <ClipboardList className="h-5 w-5 mr-2 text-purple-600" />
-                      Questionários Atribuídos
+                      Testes e Questionários Atribuídos
                     </CardTitle>
                     <CardDescription>
-                      Questionários, formulários e escalas do paciente
+                      Testes neuropsicológicos, questionários, formulários e escalas do paciente
                     </CardDescription>
                   </div>
                   <Button onClick={() => setShowAddQuestionario(!showAddQuestionario)}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Atribuir Questionário
+                    Atribuir Teste/Questionário
                   </Button>
                 </div>
               </CardHeader>
@@ -596,7 +596,7 @@ const AdminPacienteEdit = () => {
                 {showAddQuestionario && (
                   <Card className="mb-6 border-purple-100">
                     <CardHeader>
-                      <CardTitle>Atribuir Questionário</CardTitle>
+                      <CardTitle>Atribuir Teste/Questionário</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <form onSubmit={handleAddQuestionario} className="space-y-4">
@@ -609,7 +609,7 @@ const AdminPacienteEdit = () => {
                             <SelectContent>
                               {questionariosDisponiveis.map((questionario) => (
                                 <SelectItem key={questionario.id} value={questionario.id.toString()}>
-                                  {questionario.nome}
+                                  {questionario.nome} ({questionario.tipo})
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -628,7 +628,7 @@ const AdminPacienteEdit = () => {
                         </div>
                         <div className="flex space-x-2">
                           <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                            Atribuir Questionário
+                            Atribuir Teste/Questionário
                           </Button>
                           <Button 
                             type="button" 

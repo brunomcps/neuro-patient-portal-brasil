@@ -106,11 +106,27 @@ const AdminQuestionarios = () => {
     },
     {
       id: 4,
-      titulo: "Teste de Atenção",
-      descricao: "Avaliação da capacidade atencional",
-      tipo: "Teste",
-      estimativa_tempo: "30 min",
+      titulo: "WISC-V",
+      descricao: "Escala de Inteligência Wechsler para Crianças - 5ª Edição",
+      tipo: "Teste Neuropsicológico",
+      estimativa_tempo: "90 min",
       criado_em: "2024-01-05"
+    },
+    {
+      id: 5,
+      titulo: "TEA-Ch",
+      descricao: "Test of Everyday Attention for Children",
+      tipo: "Teste Neuropsicológico",
+      estimativa_tempo: "45 min",
+      criado_em: "2024-01-03"
+    },
+    {
+      id: 6,
+      titulo: "Inventário Beck de Ansiedade",
+      descricao: "Avaliação dos sintomas de ansiedade",
+      tipo: "Inventário",
+      estimativa_tempo: "10 min",
+      criado_em: "2024-01-01"
     }
   ];
 
@@ -186,8 +202,8 @@ const AdminQuestionarios = () => {
               Voltar ao Dashboard
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Gerenciar Questionários</h1>
-              <p className="text-gray-600">Gerencie formulários, escalas e testes para os pacientes</p>
+              <h1 className="text-3xl font-bold text-gray-800">Gerenciar Testes e Questionários</h1>
+              <p className="text-gray-600">Gerencie formulários, escalas, testes neuropsicológicos e questionários para os pacientes</p>
             </div>
           </div>
           <Button 
@@ -195,16 +211,16 @@ const AdminQuestionarios = () => {
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Novo Questionário
+            Novo Teste/Questionário
           </Button>
         </div>
 
         {showAddForm && (
           <Card className="mb-8 border-blue-100">
             <CardHeader>
-              <CardTitle>Adicionar Novo Questionário</CardTitle>
+              <CardTitle>Adicionar Novo Teste/Questionário</CardTitle>
               <CardDescription>
-                Crie um novo formulário, escala ou teste
+                Crie um novo formulário, escala, teste neuropsicológico ou questionário
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -228,7 +244,9 @@ const AdminQuestionarios = () => {
                       <SelectContent>
                         <SelectItem value="Formulário">Formulário</SelectItem>
                         <SelectItem value="Escala">Escala</SelectItem>
-                        <SelectItem value="Teste">Teste</SelectItem>
+                        <SelectItem value="Teste Neuropsicológico">Teste Neuropsicológico</SelectItem>
+                        <SelectItem value="Questionário">Questionário</SelectItem>
+                        <SelectItem value="Inventário">Inventário</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -253,7 +271,7 @@ const AdminQuestionarios = () => {
                 </div>
                 <div className="flex space-x-2">
                   <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                    Adicionar Questionário
+                    Adicionar Teste/Questionário
                   </Button>
                   <Button 
                     type="button" 
@@ -273,12 +291,12 @@ const AdminQuestionarios = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <FileText className="h-5 w-5 mr-2 text-blue-600" />
-                Lista de Questionários
+                Lista de Testes e Questionários
               </CardTitle>
               <div className="relative w-80">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Buscar questionários..."
+                  placeholder="Buscar testes e questionários..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -310,7 +328,11 @@ const AdminQuestionarios = () => {
                             ? "bg-blue-100 text-blue-800" 
                             : questionario.tipo === "Escala"
                             ? "bg-green-100 text-green-800"
-                            : "bg-purple-100 text-purple-800"
+                            : questionario.tipo === "Teste Neuropsicológico"
+                            ? "bg-purple-100 text-purple-800"
+                            : questionario.tipo === "Inventário"
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-gray-100 text-gray-800"
                         }
                       >
                         {questionario.tipo}

@@ -39,7 +39,8 @@ import {
   Trash2,
   ArrowLeft,
   Users,
-  Clock
+  Clock,
+  FileText
 } from "lucide-react";
 import Header from "@/components/Header";
 import { toast } from "@/hooks/use-toast";
@@ -57,7 +58,9 @@ const AdminSessoes = () => {
     orientacoes: "",
     responsavel: "",
     duracao_estimada: "",
-    tipo: ""
+    tipo: "",
+    testes_selecionados: [] as number[],
+    testes_visiveis_paciente: true
   });
   const [planData, setPlanData] = useState({
     paciente_id: "",
@@ -151,6 +154,15 @@ const AdminSessoes = () => {
     { id: 4, nome: "Pedro Oliveira", email: "pedro@email.com" }
   ];
 
+  const testesDisponiveis = [
+    { id: 1, nome: "Formulário Inicial", tipo: "Formulário", tempo: "15 min" },
+    { id: 2, nome: "Escala SRS-2", tipo: "Escala", tempo: "20 min" },
+    { id: 3, nome: "BDEFS", tipo: "Escala", tempo: "25 min" },
+    { id: 4, nome: "WISC-V", tipo: "Teste Neuropsicológico", tempo: "90 min" },
+    { id: 5, nome: "TEA-Ch", tipo: "Teste Neuropsicológico", tempo: "45 min" },
+    { id: 6, nome: "Inventário Beck de Ansiedade", tipo: "Inventário", tempo: "10 min" }
+  ];
+
   const filteredSessoes = sessoes.filter(sessao =>
     sessao.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sessao.descricao.toLowerCase().includes(searchTerm.toLowerCase())
@@ -162,7 +174,7 @@ const AdminSessoes = () => {
       title: "Sessão criada",
       description: `${formData.nome} foi criada com sucesso.`,
     });
-    setFormData({ nome: "", descricao: "", orientacoes: "", responsavel: "", duracao_estimada: "", tipo: "" });
+    setFormData({ nome: "", descricao: "", orientacoes: "", responsavel: "", duracao_estimada: "", tipo: "", testes_selecionados: [], testes_visiveis_paciente: true });
     setShowAddForm(false);
   };
 
@@ -201,6 +213,15 @@ const AdminSessoes = () => {
     }));
   };
 
+  const toggleTesteSelection = (testeId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      testes_selecionados: prev.testes_selecionados.includes(testeId)
+        ? prev.testes_selecionados.filter(id => id !== testeId)
+        : [...prev.testes_selecionados, testeId]
+    }));
+  };
+
   if (!user) return null;
 
   return (
@@ -230,6 +251,13 @@ const AdminSessoes = () => {
             >
               <Users className="h-4 w-4 mr-2" />
               Planejar Sessões
+            </Button>
+            <Button 
+              onClick={() => navigate("/admin/questionarios")}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Atribuir Testes Independentes
             </Button>
             <Button 
               onClick={() => setShowAddForm(!showAddForm)}
@@ -296,6 +324,38 @@ const AdminSessoes = () => {
                     value={formData.duracao_estimada}
                     onChange={(e) => setFormData({...formData, duracao_estimada: e.target.value})}
                   />
+                </div>
+                <div>
+                  <Label>Testes e Questionários para esta Sessão</Label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-4">
+                    {testesDisponiveis.map((teste) => (
+                      <div key={teste.id} className="flex items-center space-x-3 p-2 border rounded">
+                        <input
+                          type="checkbox"
+                          id={`teste-${teste.id}`}
+                          checked={formData.testes_selecionados.includes(teste.id)}
+                          onChange={() => toggleTesteSelection(teste.id)}
+                          className="h-4 w-4"
+                        />
+                        <label htmlFor={`teste-${teste.id}`} className="flex-1 cursor-pointer">
+                          <div className="font-medium">{teste.nome}</div>
+                          <div className="text-sm text-gray-600">{teste.tipo} • {teste.tempo}</div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="testes_visiveis"
+                    checked={formData.testes_visiveis_paciente}
+                    onChange={(e) => setFormData({...formData, testes_visiveis_paciente: e.target.checked})}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="testes_visiveis" className="text-sm">
+                    Testes visíveis para o paciente antes da sessão
+                  </Label>
                 </div>
                 <div className="flex space-x-2">
                   <Button type="submit" className="bg-green-600 hover:bg-green-700">
