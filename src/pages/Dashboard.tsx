@@ -14,10 +14,16 @@ import {
   MessageSquare, 
   AlertCircle,
   FileText,
-  ClipboardList
+  ClipboardList,
+  MapPin,
+  Monitor,
+  ExternalLink,
+  Eye,
+  CreditCard,
+  Phone,
+  User
 } from "lucide-react";
 import Header from "@/components/Header";
-import TimeLine from "@/components/TimeLine";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -41,11 +47,20 @@ const Dashboard = () => {
 
   // Dados de demonstração
   const progressoGeral = 60; // 3 de 5 etapas concluídas
+  const sessoesConcluidas = 2;
+  const totalSessoes = 5;
+  const questionariosRealizados = 1;
+  const totalQuestionarios = 3;
+  const pagamentosPendentes = 1;
+
   const proximaConsulta = {
     data: "15 de Fevereiro, 2024",
     horario: "14:00",
-    tipo: "Sessão de Avaliação Comportamental",
-    link: "https://meet.google.com/abc-defg-hij"
+    tipo: "Testes Específicos",
+    profissional: "Dra. Gabrielly La-Cava",
+    local: "online",
+    link: "https://meet.google.com/abc-defg-hij",
+    descricao: "Aplicação de testes específicos baseados nas hipóteses diagnósticas levantadas."
   };
 
   const sessoes = [
@@ -54,50 +69,60 @@ const Dashboard = () => {
       nome: "Sessão Inicial",
       descricao: "Entrevista inicial para coleta de dados básicos, histórico clínico e definição dos objetivos da avaliação.",
       orientacoes: "Chegue 15 minutos antes. Traga documentos de identificação e relatórios médicos anteriores.",
-      responsavel: "Dr. João Silva",
+      profissional: "Dra. Gabrielly La-Cava",
       ordem: 1,
       status: "concluido",
-      data: "2024-01-10T14:00:00"
+      data: "2024-01-10T14:00:00",
+      local: "copacabana",
+      endereco: "Rua Barata Ribeiro, 123 - Copacabana, Rio de Janeiro - RJ"
     },
     {
       id: 2,
       nome: "Avaliação Cognitiva",
       descricao: "Aplicação de testes neuropsicológicos para avaliação das funções cognitivas básicas.",
       orientacoes: "Durma bem na noite anterior. Tome café da manhã normalmente. Traga óculos se usar.",
-      responsavel: "Dr. João Silva",
+      profissional: "Dra. Gabrielly La-Cava",
       ordem: 2,
       status: "concluido",
-      data: "2024-01-17T14:00:00"
+      data: "2024-01-17T14:00:00",
+      local: "online",
+      link: "https://meet.google.com/def-ghij-klm"
     },
     {
       id: 3,
       nome: "Testes Específicos",
       descricao: "Aplicação de testes específicos baseados nas hipóteses diagnósticas levantadas.",
       orientacoes: "Mantenha medicação regular. Evite bebidas alcoólicas 24h antes.",
-      responsavel: "Dr. João Silva",
+      profissional: "Dra. Gabrielly La-Cava",
       ordem: 3,
       status: "pendente",
-      data: "2024-02-15T14:00:00"
+      data: "2024-02-15T14:00:00",
+      local: "online",
+      link: "https://meet.google.com/abc-defg-hij"
     },
     {
       id: 4,
       nome: "Avaliação Comportamental",
       descricao: "Observação e avaliação de aspectos comportamentais e emocionais.",
       orientacoes: "Sessão com duração estendida. Traga lanche leve se necessário.",
-      responsavel: "Dra. Maria Santos",
+      profissional: "Dr. Carlos Mendes",
       ordem: 4,
       status: "pendente",
-      data: "2024-02-22T14:00:00"
+      data: "2024-02-22T14:00:00",
+      local: "leblon",
+      endereco: "Av. Ataulfo de Paiva, 456 - Leblon, Rio de Janeiro - RJ"
     },
     {
       id: 5,
       nome: "Sessão de Alinhamento Diagnóstico",
       descricao: "Revisão dos resultados, discussão dos achados e entrega do relatório final.",
       orientacoes: "Compareça acompanhado de familiar se desejar. Sessão para esclarecimento de dúvidas.",
-      responsavel: "Dr. João Silva",
+      profissional: "Dra. Gabrielly La-Cava",
       ordem: 5,
       status: "pendente",
-      data: "2024-03-01T14:00:00"
+      data: "2024-03-01T14:00:00",
+      local: "copacabana",
+      endereco: "Rua Barata Ribeiro, 123 - Copacabana, Rio de Janeiro - RJ"
     }
   ];
 
@@ -105,6 +130,7 @@ const Dashboard = () => {
     { 
       id: 1, 
       nome: "Formulário Inicial", 
+      tipo: "Formulário",
       status: "concluido", 
       prazo: "Concluído",
       link: "https://forms.google.com/..."
@@ -112,20 +138,15 @@ const Dashboard = () => {
     { 
       id: 2, 
       nome: "Escala SRS-2", 
-      status: "concluido", 
-      prazo: "Concluído",
-      link: "https://forms.google.com/..."
-    },
-    { 
-      id: 3, 
-      nome: "BDEFS", 
+      tipo: "Escala",
       status: "pendente", 
       prazo: "Até 20/02/2024",
       link: "https://forms.google.com/..."
     },
     { 
-      id: 4, 
-      nome: "Questionário Complementar", 
+      id: 3, 
+      nome: "BDEFS", 
+      tipo: "Escala",
       status: "pendente", 
       prazo: "Até 25/02/2024",
       link: "https://forms.google.com/..."
@@ -133,7 +154,51 @@ const Dashboard = () => {
   ];
 
   const prazoLaudo = "28 de Fevereiro, 2024";
-  const agendamentoDevolutiva = "A partir de 01 de Março, 2024";
+
+  const getStatusIcon = (status: string) => {
+    return status === "concluido" ? (
+      <CheckCircle className="h-6 w-6 text-white" />
+    ) : (
+      <Clock className="h-6 w-6 text-white" />
+    );
+  };
+
+  const getStatusColor = (status: string) => {
+    return status === "concluido" 
+      ? "bg-green-500 border-green-300" 
+      : "bg-orange-500 border-orange-300";
+  };
+
+  const getLocalIcon = (local: string) => {
+    return local === "online" ? (
+      <Monitor className="h-4 w-4" />
+    ) : (
+      <MapPin className="h-4 w-4" />
+    );
+  };
+
+  const getLocalButton = (sessao: any) => {
+    if (sessao.local === "online") {
+      return (
+        <Button size="sm" variant="outline" asChild>
+          <a href={sessao.link} target="_blank" rel="noopener noreferrer">
+            <Monitor className="h-4 w-4 mr-2" />
+            Acessar
+          </a>
+        </Button>
+      );
+    } else {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sessao.endereco)}`;
+      return (
+        <Button size="sm" variant="outline" asChild>
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            <MapPin className="h-4 w-4 mr-2" />
+            Ver Local
+          </a>
+        </Button>
+      );
+    }
+  };
 
   if (!user) return null;
 
@@ -160,96 +225,216 @@ const Dashboard = () => {
               Progresso da Avaliação
             </CardTitle>
             <CardDescription>
-              Você completou {Math.round((progressoGeral / 100) * 5)} de 5 etapas
+              Acompanhe o andamento do seu processo de avaliação
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Progress value={progressoGeral} className="mb-4" />
-            <p className="text-sm text-gray-600">
-              {progressoGeral}% concluído - Continue assim! 🎉
-            </p>
+            <Progress value={progressoGeral} className="mb-6" />
+            
+            {/* Medidores */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
+                <Calendar className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Sessões</p>
+                  <p className="text-xl font-bold text-blue-600">{sessoesConcluidas}/{totalSessoes}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg">
+                <ClipboardList className="h-8 w-8 text-purple-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Questionários</p>
+                  <p className="text-xl font-bold text-purple-600">{questionariosRealizados}/{totalQuestionarios}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-4 bg-orange-50 rounded-lg">
+                <CreditCard className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pagamentos Pendentes</p>
+                  <p className="text-xl font-bold text-orange-600">{pagamentosPendentes}</p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Timeline */}
-            <TimeLine sessoes={sessoes} />
+            {/* Timeline Aprimorada */}
+            <Card className="border-blue-100">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+                  Linha do Tempo da Avaliação
+                </CardTitle>
+                <CardDescription>
+                  Acompanhe o progresso das suas sessões de avaliação neuropsicológica
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                  
+                  <div className="space-y-6">
+                    {sessoes.map((sessao, index) => (
+                      <div key={sessao.id} className="relative flex items-start space-x-4">
+                        {/* Timeline Dot */}
+                        <div className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full border-4 ${getStatusColor(sessao.status)}`}>
+                          {getStatusIcon(sessao.status)}
+                        </div>
+                        
+                        {/* Session Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                  {sessao.nome}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-2">
+                                  {new Date(sessao.data).toLocaleDateString('pt-BR', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  })} às {new Date(sessao.data).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                                <p className="text-sm text-gray-700 mb-3 flex items-center">
+                                  <User className="h-4 w-4 mr-1" />
+                                  {sessao.profissional}
+                                </p>
+                                <div className="flex items-center space-x-2 mb-4">
+                                  <Badge 
+                                    variant={sessao.status === "concluido" ? "default" : "secondary"}
+                                    className={sessao.status === "concluido" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
+                                  >
+                                    {sessao.status === "concluido" ? "Concluído" : "Pendente"}
+                                  </Badge>
+                                  <Badge variant="outline" className="flex items-center space-x-1">
+                                    {getLocalIcon(sessao.local)}
+                                    <span className="capitalize">{sessao.local}</span>
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                              {sessao.descricao}
+                            </p>
+                            
+                            <div className="flex space-x-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Leia Mais
+                              </Button>
+                              {getLocalButton(sessao)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Questionários */}
             <Card className="border-purple-100">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <ClipboardList className="h-5 w-5 mr-2 text-purple-600" />
-                  Questionários
+                  Testes e Questionários
                 </CardTitle>
                 <CardDescription>
                   Formulários, escalas e testes para preenchimento
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {questionarios.map((questionario) => (
-                    <div key={questionario.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800">{questionario.nome}</h4>
-                        <p className="text-sm text-gray-600">Prazo: {questionario.prazo}</p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Badge 
-                          variant={questionario.status === "concluido" ? "default" : "secondary"}
-                          className={questionario.status === "concluido" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
-                        >
-                          {questionario.status === "concluido" ? "Concluído" : "Pendente"}
-                        </Badge>
-                        {questionario.status === "pendente" && (
-                          <Button size="sm" asChild>
-                            <a href={questionario.link} target="_blank" rel="noopener noreferrer">
-                              Preencher
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                    <Card key={questionario.id} className="border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h4 className="font-medium text-gray-800">{questionario.nome}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {questionario.tipo}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600">Prazo: {questionario.prazo}</p>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Badge 
+                              variant={questionario.status === "concluido" ? "default" : "secondary"}
+                              className={questionario.status === "concluido" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}
+                            >
+                              {questionario.status === "concluido" ? "Concluído" : "Pendente"}
+                            </Badge>
+                            {questionario.status === "pendente" && (
+                              <Button size="sm" asChild>
+                                <a href={questionario.link} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  Preencher
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="border-blue-100">
-                <CardContent className="p-6 text-center">
-                  <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Agendamentos</h3>
-                  <p className="text-sm text-gray-600 mb-4">Visualize e gerencie suas consultas</p>
-                  <Button size="sm" className="w-full">
-                    Ver Agenda
+            {/* Ações Rápidas */}
+            <Card className="border-gray-100">
+              <CardHeader>
+                <CardTitle>Ações Rápidas</CardTitle>
+                <CardDescription>Acesse rapidamente as principais funcionalidades</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                    <Phone className="h-6 w-6 text-green-600" />
+                    <span className="text-xs">WhatsApp</span>
                   </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-green-100">
-                <CardContent className="p-6 text-center">
-                  <FileText className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Recursos</h3>
-                  <p className="text-sm text-gray-600 mb-4">Dicas e informações úteis</p>
-                  <Button 
-                    size="sm" 
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    onClick={() => navigate("/recursos")}
-                  >
-                    Acessar
+                  
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                    <Calendar className="h-6 w-6 text-blue-600" />
+                    <span className="text-xs">Linha do Tempo</span>
                   </Button>
-                </CardContent>
-              </Card>
-            </div>
+                  
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                    <ClipboardList className="h-6 w-6 text-purple-600" />
+                    <span className="text-xs">Questionários</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                    <CreditCard className="h-6 w-6 text-orange-600" />
+                    <span className="text-xs">Pagamentos</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                    <FileText className="h-6 w-6 text-gray-600" />
+                    <span className="text-xs">Relatório Final</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Next Appointment */}
+            {/* Próxima Consulta */}
             <Card className="border-blue-100">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
@@ -258,7 +443,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
                     <p className="font-medium text-gray-800">{proximaConsulta.data}</p>
                     <p className="text-sm text-gray-600 flex items-center">
@@ -268,37 +453,56 @@ const Dashboard = () => {
                   </div>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">{proximaConsulta.tipo}</p>
-                    <Button size="sm" variant="outline" className="w-full mt-2" asChild>
-                      <a href={proximaConsulta.link} target="_blank" rel="noopener noreferrer">
-                        Acessar Consulta
-                      </a>
-                    </Button>
+                    <p className="text-sm font-medium text-gray-700 mb-1">{proximaConsulta.tipo}</p>
+                    <p className="text-sm text-gray-600 mb-2 flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      {proximaConsulta.profissional}
+                    </p>
+                    <Badge variant="outline" className="flex items-center space-x-1 w-fit mb-3">
+                      {getLocalIcon(proximaConsulta.local)}
+                      <span className="capitalize">{proximaConsulta.local}</span>
+                    </Badge>
+                    <div className="space-y-2">
+                      {proximaConsulta.local === "online" ? (
+                        <Button size="sm" variant="outline" className="w-full" asChild>
+                          <a href={proximaConsulta.link} target="_blank" rel="noopener noreferrer">
+                            <Monitor className="h-4 w-4 mr-2" />
+                            Acessar Consulta
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" className="w-full" asChild>
+                          <a href="#" target="_blank" rel="noopener noreferrer">
+                            <MapPin className="h-4 w-4 mr-2" />
+                            Ver Endereço
+                          </a>
+                        </Button>
+                      )}
+                      <Button size="sm" variant="outline" className="w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Detalhes
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Important Dates */}
+            {/* Prazo do Relatório */}
             <Card className="border-orange-100">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <AlertCircle className="h-5 w-5 mr-2 text-orange-600" />
-                  Datas Importantes
+                  Prazo de Entrega do Relatório
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-3 bg-orange-50 rounded-lg">
-                  <p className="text-sm font-medium text-orange-800">Prazo do Laudo</p>
-                  <p className="text-sm text-orange-600">{prazoLaudo}</p>
-                </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm font-medium text-green-800">Agendamento da Devolutiva</p>
-                  <p className="text-sm text-green-600">{agendamentoDevolutiva}</p>
-                  <Button size="sm" variant="outline" className="w-full mt-2">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contatar Secretária
-                  </Button>
+              <CardContent>
+                <div className="p-4 bg-orange-50 rounded-lg text-center">
+                  <p className="text-sm font-medium text-orange-800">Entrega prevista para</p>
+                  <p className="text-lg font-bold text-orange-600">{prazoLaudo}</p>
+                  <p className="text-xs text-orange-600 mt-2">
+                    Após conclusão de todos os testes
+                  </p>
                 </div>
               </CardContent>
             </Card>
