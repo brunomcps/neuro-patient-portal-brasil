@@ -16,7 +16,6 @@ import AdminSessoes from "./pages/AdminSessoes";
 import Recursos from "./pages/Recursos";
 import NotFound from "./pages/NotFound";
 import PacienteSessoes from "./pages/PacienteSessoes";
-import PacienteAgendamentos from "./pages/PacienteAgendamentos";
 import PacientePagamentos from "./pages/PacientePagamentos";
 
 const queryClient = new QueryClient();
@@ -37,9 +36,8 @@ const App = () => (
           <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
           <Route path="/admin/questionarios" element={<AdminQuestionarios />} />
           <Route path="/admin/relatorios" element={<AdminRelatorios />} />
-          <Route path="/paciente/sessoes" element={<PacienteSessoes />} />
-          <Route path="/paciente/agendamentos" element={<PacienteAgendamentos />} />
           <Route path="/paciente/pagamentos" element={<PacientePagamentos />} />
+          <Route path="/paciente/sessoes" element={<PacienteSessoes />} />
           <Route path="/recursos" element={<Recursos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

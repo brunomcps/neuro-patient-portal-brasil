@@ -293,9 +293,9 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-3 space-y-8"></div>
             {/* Timeline Aprimorada */}
             <Card className="border-blue-100 timeline-section">
               <CardHeader>
@@ -428,6 +428,11 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
+            
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
             {/* Ações Rápidas */}
             <Card className="border-gray-100">
               <CardHeader>
@@ -435,43 +440,39 @@ const Dashboard = () => {
                 <CardDescription>Acesse rapidamente as principais funcionalidades</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-4">
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleWhatsApp}>
-                    <Phone className="h-6 w-6 text-green-600" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handleWhatsApp}>
+                    <Phone className="h-5 w-5 text-green-600" />
                     <span className="text-xs">WhatsApp</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleTimeline}>
-                    <Calendar className="h-6 w-6 text-blue-600" />
-                    <span className="text-xs">Minhas Sessões</span>
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handleTimeline}>
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <span className="text-xs">Sessões</span>
                   </Button>
 
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleAgendamentos}>
-                    <Clock className="h-6 w-6 text-indigo-600" />
-                    <span className="text-xs">Agendamentos</span>
-                  </Button>
-                  
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleQuestionarios}>
-                    <ClipboardList className="h-6 w-6 text-purple-600" />
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handleQuestionarios}>
+                    <ClipboardList className="h-5 w-5 text-purple-600" />
                     <span className="text-xs">Questionários</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handlePagamentos}>
-                    <CreditCard className="h-6 w-6 text-orange-600" />
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handlePagamentos}>
+                    <CreditCard className="h-5 w-5 text-orange-600" />
                     <span className="text-xs">Pagamentos</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleRelatorioFinal}>
-                    <FileText className="h-6 w-6 text-gray-600" />
-                    <span className="text-xs">Relatório Final</span>
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handleRelatorioFinal}>
+                    <FileText className="h-5 w-5 text-gray-600" />
+                    <span className="text-xs">Relatório</span>
+                  </Button>
+
+                  <Button variant="outline" className="flex flex-col h-16 space-y-1" onClick={handleAgendamentos}>
+                    <Clock className="h-5 w-5 text-indigo-600" />
+                    <span className="text-xs">Agendar</span>
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
             {/* Próxima Consulta */}
             <Card className="border-blue-100">
               <CardHeader>
