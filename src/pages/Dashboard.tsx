@@ -295,7 +295,7 @@ const Dashboard = () => {
 
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-8"></div>
+          <div className="lg:col-span-3 space-y-8">
             {/* Timeline Aprimorada */}
             <Card className="border-blue-100 timeline-section">
               <CardHeader>
@@ -427,8 +427,6 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-
-            
           </div>
 
           {/* Sidebar */}
