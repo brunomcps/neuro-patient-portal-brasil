@@ -200,6 +200,36 @@ const Dashboard = () => {
     }
   };
 
+  const handleWhatsApp = () => {
+    window.open("https://wa.me/5521999999999?text=Olá, gostaria de falar sobre minha avaliação neuropsicológica", "_blank");
+  };
+
+  const handleTimeline = () => {
+    // Scroll to timeline section
+    document.querySelector('.timeline-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleQuestionarios = () => {
+    // Scroll to questionarios section
+    document.querySelector('.questionarios-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handlePagamentos = () => {
+    alert("Funcionalidade de pagamentos em desenvolvimento. Em breve você poderá visualizar e gerenciar seus pagamentos.");
+  };
+
+  const handleRelatorioFinal = () => {
+    alert("Seu relatório final estará disponível após a conclusão de todas as sessões e testes.");
+  };
+
+  const handleVerDetalhes = () => {
+    alert(`Detalhes da consulta:\n\nTipo: ${proximaConsulta.tipo}\nData: ${proximaConsulta.data}\nHorário: ${proximaConsulta.horario}\nProfissional: ${proximaConsulta.profissional}\nLocal: ${proximaConsulta.local}\n\nDescrição: ${proximaConsulta.descricao}`);
+  };
+
+  const handleLeiaMais = (sessao: any) => {
+    alert(`${sessao.nome}\n\nDescrição completa:\n${sessao.descricao}\n\nOrientações:\n${sessao.orientacoes}\n\nProfissional: ${sessao.profissional}\nData: ${new Date(sessao.data).toLocaleDateString('pt-BR')}\nStatus: ${sessao.status === 'concluido' ? 'Concluído' : 'Pendente'}`);
+  };
+
   if (!user) return null;
 
   return (
@@ -264,7 +294,7 @@ const Dashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Timeline Aprimorada */}
-            <Card className="border-blue-100">
+            <Card className="border-blue-100 timeline-section">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Calendar className="h-5 w-5 mr-2 text-blue-600" />
@@ -330,7 +360,7 @@ const Dashboard = () => {
                             </p>
                             
                             <div className="flex space-x-2">
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" onClick={() => handleLeiaMais(sessao)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Leia Mais
                               </Button>
@@ -346,7 +376,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Questionários */}
-            <Card className="border-purple-100">
+            <Card className="border-purple-100 questionarios-section">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <ClipboardList className="h-5 w-5 mr-2 text-purple-600" />
@@ -403,27 +433,27 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleWhatsApp}>
                     <Phone className="h-6 w-6 text-green-600" />
                     <span className="text-xs">WhatsApp</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleTimeline}>
                     <Calendar className="h-6 w-6 text-blue-600" />
                     <span className="text-xs">Linha do Tempo</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleQuestionarios}>
                     <ClipboardList className="h-6 w-6 text-purple-600" />
                     <span className="text-xs">Questionários</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handlePagamentos}>
                     <CreditCard className="h-6 w-6 text-orange-600" />
                     <span className="text-xs">Pagamentos</span>
                   </Button>
                   
-                  <Button variant="outline" className="flex flex-col h-20 space-y-2">
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleRelatorioFinal}>
                     <FileText className="h-6 w-6 text-gray-600" />
                     <span className="text-xs">Relatório Final</span>
                   </Button>
@@ -472,13 +502,13 @@ const Dashboard = () => {
                         </Button>
                       ) : (
                         <Button size="sm" variant="outline" className="w-full" asChild>
-                          <a href="#" target="_blank" rel="noopener noreferrer">
+                          <a href="https://www.google.com/maps/search/?api=1&query=Rua+Barata+Ribeiro,+123+-+Copacabana,+Rio+de+Janeiro+-+RJ" target="_blank" rel="noopener noreferrer">
                             <MapPin className="h-4 w-4 mr-2" />
                             Ver Endereço
                           </a>
                         </Button>
                       )}
-                      <Button size="sm" variant="outline" className="w-full">
+                      <Button size="sm" variant="outline" className="w-full" onClick={handleVerDetalhes}>
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Detalhes
                       </Button>
