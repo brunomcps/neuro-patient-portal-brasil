@@ -205,8 +205,7 @@ const Dashboard = () => {
   };
 
   const handleTimeline = () => {
-    // Scroll to timeline section
-    document.querySelector('.timeline-section')?.scrollIntoView({ behavior: 'smooth' });
+    navigate("/paciente/sessoes");
   };
 
   const handleQuestionarios = () => {
@@ -215,7 +214,11 @@ const Dashboard = () => {
   };
 
   const handlePagamentos = () => {
-    alert("Funcionalidade de pagamentos em desenvolvimento. Em breve você poderá visualizar e gerenciar seus pagamentos.");
+    navigate("/paciente/pagamentos");
+  };
+
+  const handleAgendamentos = () => {
+    navigate("/paciente/agendamentos");
   };
 
   const handleRelatorioFinal = () => {
@@ -432,7 +435,7 @@ const Dashboard = () => {
                 <CardDescription>Acesse rapidamente as principais funcionalidades</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-4">
                   <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleWhatsApp}>
                     <Phone className="h-6 w-6 text-green-600" />
                     <span className="text-xs">WhatsApp</span>
@@ -440,7 +443,12 @@ const Dashboard = () => {
                   
                   <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleTimeline}>
                     <Calendar className="h-6 w-6 text-blue-600" />
-                    <span className="text-xs">Linha do Tempo</span>
+                    <span className="text-xs">Minhas Sessões</span>
+                  </Button>
+
+                  <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleAgendamentos}>
+                    <Clock className="h-6 w-6 text-indigo-600" />
+                    <span className="text-xs">Agendamentos</span>
                   </Button>
                   
                   <Button variant="outline" className="flex flex-col h-20 space-y-2" onClick={handleQuestionarios}>

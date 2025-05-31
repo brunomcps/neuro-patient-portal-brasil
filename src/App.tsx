@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,9 @@ import AdminQuestionarios from "./pages/AdminQuestionarios";
 import AdminSessoes from "./pages/AdminSessoes";
 import Recursos from "./pages/Recursos";
 import NotFound from "./pages/NotFound";
+import PacienteSessoes from "./pages/PacienteSessoes";
+import PacienteAgendamentos from "./pages/PacienteAgendamentos";
+import PacientePagamentos from "./pages/PacientePagamentos";
 
 const queryClient = new QueryClient();
 
@@ -33,9 +35,11 @@ const App = () => (
           <Route path="/admin/pacientes" element={<AdminPacientes />} />
           <Route path="/admin/pacientes/edit/:id" element={<AdminPacienteEdit />} />
           <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
-          <Route path="/admin/relatorios" element={<AdminRelatorios />} />
           <Route path="/admin/questionarios" element={<AdminQuestionarios />} />
-          <Route path="/admin/sessoes" element={<AdminSessoes />} />
+          <Route path="/admin/relatorios" element={<AdminRelatorios />} />
+          <Route path="/paciente/sessoes" element={<PacienteSessoes />} />
+          <Route path="/paciente/agendamentos" element={<PacienteAgendamentos />} />
+          <Route path="/paciente/pagamentos" element={<PacientePagamentos />} />
           <Route path="/recursos" element={<Recursos />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
