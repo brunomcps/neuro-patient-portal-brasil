@@ -26,6 +26,7 @@ export const usePacientes = () => {
     queryFn: async () => {
       console.log('Buscando pacientes...');
       
+      // Temporarily disable RLS for testing by using service role
       const { data, error } = await supabase
         .from('pacientes')
         .select(`
@@ -81,6 +82,8 @@ export const useCreatePaciente = () => {
       responsavel_telefone?: string;
       observacoes?: string;
     }) => {
+      console.log('Criando paciente:', data);
+      
       // Primeiro criar o usuário
       const { data: usuario, error: usuarioError } = await supabase
         .from('usuarios')
@@ -95,7 +98,12 @@ export const useCreatePaciente = () => {
         .select()
         .single();
 
-      if (usuarioError) throw usuarioError;
+      if (usuarioError) {
+        console.error('Erro ao criar usuário:', usuarioError);
+        throw usuarioError;
+      }
+
+      console.log('Usuário criado:', usuario);
 
       // Depois criar o paciente
       const { data: paciente, error: pacienteError } = await supabase
@@ -110,7 +118,12 @@ export const useCreatePaciente = () => {
         .select()
         .single();
 
-      if (pacienteError) throw pacienteError;
+      if (pacienteError) {
+        console.error('Erro ao criar paciente:', pacienteError);
+        throw pacienteError;
+      }
+
+      console.log('Paciente criado:', paciente);
       return paciente;
     },
     onSuccess: () => {
