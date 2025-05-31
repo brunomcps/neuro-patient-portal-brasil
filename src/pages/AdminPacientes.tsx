@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Search, FileText, Calendar, DollarSign, Eye } from "lucide-react";
+import { Plus, Search, FileText, Calendar, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,16 +14,26 @@ const AdminPacientes = () => {
   const navigate = useNavigate();
   const { data: pacientes, isLoading, error } = usePacientes();
 
+  console.log("AdminPacientes - Dados carregados:", { pacientes, isLoading, error });
+
   const filteredPacientes = pacientes?.filter(paciente =>
     paciente.usuarios?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     paciente.usuarios?.email.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   if (error) {
+    console.error("Erro ao carregar pacientes:", error);
     return (
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Erro ao carregar pacientes. Tente novamente.</p>
+          <p className="text-red-800">Erro ao carregar pacientes: {error.message}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-2"
+            variant="outline"
+          >
+            Tentar Novamente
+          </Button>
         </div>
       </div>
     );
@@ -73,7 +83,17 @@ const AdminPacientes = () => {
         ) : filteredPacientes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-gray-500">Nenhum paciente encontrado.</p>
+              <p className="text-gray-500">
+                {pacientes?.length === 0 ? "Nenhum paciente cadastrado." : "Nenhum paciente encontrado."}
+              </p>
+              {pacientes?.length === 0 && (
+                <Button 
+                  onClick={() => navigate("/admin/pacientes/novo")} 
+                  className="mt-4"
+                >
+                  Cadastrar Primeiro Paciente
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
@@ -123,7 +143,7 @@ const AdminPacientes = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/admin/pacientes/${paciente.id}`)}
+                    onClick={() => navigate(`/admin/pacientes/edit/${paciente.id}`)}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     Ver Detalhes

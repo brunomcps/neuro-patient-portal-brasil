@@ -24,6 +24,8 @@ export const usePacientes = () => {
   return useQuery({
     queryKey: ['pacientes'],
     queryFn: async () => {
+      console.log('Buscando pacientes...');
+      
       const { data, error } = await supabase
         .from('pacientes')
         .select(`
@@ -32,7 +34,12 @@ export const usePacientes = () => {
         `)
         .eq('status', 'ativo');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar pacientes:', error);
+        throw error;
+      }
+      
+      console.log('Pacientes encontrados:', data);
       return data as Paciente[];
     },
   });
@@ -42,6 +49,8 @@ export const usePaciente = (id: string) => {
   return useQuery({
     queryKey: ['paciente', id],
     queryFn: async () => {
+      if (!id) return null;
+      
       const { data, error } = await supabase
         .from('pacientes')
         .select(`

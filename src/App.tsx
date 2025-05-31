@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,14 +33,15 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/pacientes" element={<AdminPacientes />} />
+          <Route path="/admin/pacientes/novo" element={<AdminPacienteEdit />} />
           <Route path="/admin/pacientes/edit/:id" element={<AdminPacienteEdit />} />
           <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
           <Route path="/admin/questionarios" element={<AdminQuestionarios />} />
           <Route path="/admin/relatorios" element={<AdminRelatorios />} />
+          <Route path="/admin/sessoes" element={<AdminSessoes />} />
           <Route path="/paciente/pagamentos" element={<PacientePagamentos />} />
           <Route path="/paciente/sessoes" element={<PacienteSessoes />} />
           <Route path="/recursos" element={<Recursos />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
