@@ -9,7 +9,373 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      pacientes: {
+        Row: {
+          created_at: string | null
+          id: string
+          observacoes: string | null
+          responsavel_nome: string | null
+          responsavel_telefone: string | null
+          status: string | null
+          updated_at: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          observacoes?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          observacoes?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string | null
+          updated_at?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pacientes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          created_at: string | null
+          data_pagamento: string | null
+          data_vencimento: string
+          id: string
+          metodo_pagamento: string | null
+          observacoes: string | null
+          paciente_id: string | null
+          sessao_id: string | null
+          status: string | null
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento: string
+          id?: string
+          metodo_pagamento?: string | null
+          observacoes?: string | null
+          paciente_id?: string | null
+          sessao_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento?: string
+          id?: string
+          metodo_pagamento?: string | null
+          observacoes?: string | null
+          paciente_id?: string | null
+          sessao_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "sessoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionarios: {
+        Row: {
+          ativo: boolean | null
+          conteudo: Json
+          created_at: string | null
+          descricao: string | null
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          conteudo: Json
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo: string
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          conteudo?: Json
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      relatorios: {
+        Row: {
+          conteudo: string
+          created_at: string | null
+          data_entrega: string | null
+          data_previsao_entrega: string | null
+          id: string
+          paciente_id: string | null
+          status: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string | null
+          data_entrega?: string | null
+          data_previsao_entrega?: string | null
+          id?: string
+          paciente_id?: string | null
+          status?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string | null
+          data_entrega?: string | null
+          data_previsao_entrega?: string | null
+          id?: string
+          paciente_id?: string | null
+          status?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relatorios_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      respostas_questionario: {
+        Row: {
+          created_at: string | null
+          data_resposta: string
+          id: string
+          paciente_id: string | null
+          questionario_id: string | null
+          respostas: Json
+          sessao_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_resposta: string
+          id?: string
+          paciente_id?: string | null
+          questionario_id?: string | null
+          respostas: Json
+          sessao_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_resposta?: string
+          id?: string
+          paciente_id?: string | null
+          questionario_id?: string | null
+          respostas?: Json
+          sessao_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_questionario_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_questionario_questionario_id_fkey"
+            columns: ["questionario_id"]
+            isOneToOne: false
+            referencedRelation: "questionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_questionario_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "sessoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessao_questionarios: {
+        Row: {
+          created_at: string | null
+          id: string
+          obrigatorio: boolean | null
+          questionario_id: string | null
+          sessao_id: string | null
+          visivel_paciente: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          obrigatorio?: boolean | null
+          questionario_id?: string | null
+          sessao_id?: string | null
+          visivel_paciente?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          obrigatorio?: boolean | null
+          questionario_id?: string | null
+          sessao_id?: string | null
+          visivel_paciente?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessao_questionarios_questionario_id_fkey"
+            columns: ["questionario_id"]
+            isOneToOne: false
+            referencedRelation: "questionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessao_questionarios_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "sessoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessoes: {
+        Row: {
+          created_at: string | null
+          data_agendada: string
+          descricao: string | null
+          duracao_minutos: number
+          id: string
+          local: string
+          observacoes: string | null
+          paciente_id: string | null
+          pago: boolean | null
+          profissional_responsavel: string
+          status: string | null
+          tipo_local: string
+          titulo: string
+          updated_at: string | null
+          valor: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_agendada: string
+          descricao?: string | null
+          duracao_minutos?: number
+          id?: string
+          local: string
+          observacoes?: string | null
+          paciente_id?: string | null
+          pago?: boolean | null
+          profissional_responsavel: string
+          status?: string | null
+          tipo_local: string
+          titulo: string
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          data_agendada?: string
+          descricao?: string | null
+          duracao_minutos?: number
+          id?: string
+          local?: string
+          observacoes?: string | null
+          paciente_id?: string | null
+          pago?: boolean | null
+          profissional_responsavel?: string
+          status?: string | null
+          tipo_local?: string
+          titulo?: string
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessoes_paciente_id_fkey"
+            columns: ["paciente_id"]
+            isOneToOne: false
+            referencedRelation: "pacientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios: {
+        Row: {
+          created_at: string | null
+          data_nascimento: string | null
+          email: string
+          endereco: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          tipo_usuario: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_nascimento?: string | null
+          email: string
+          endereco?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          tipo_usuario: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_nascimento?: string | null
+          email?: string
+          endereco?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          tipo_usuario?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
