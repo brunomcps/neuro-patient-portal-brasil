@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2 } from "lucide-react";
@@ -96,6 +95,28 @@ const AdminPacienteEdit = () => {
     toast.success("Pagamento criado com sucesso!");
     setShowNovoPagamento(false);
     setPagamentoData({ descricao: "", valor: "", vencimento: "" });
+  };
+
+  // Handlers para editar e deletar sessão (mock)
+  const handleEditSessao = (sessao) => {
+    console.log("Editando sessão:", sessao);
+    toast.info(`Editando sessão ${sessao.nome}`);
+  };
+
+  const handleDeleteSessao = (sessao) => {
+    console.log("Deletando sessão:", sessao);
+    toast.warning(`Sessão ${sessao.nome} removida`);
+  };
+
+  // Handlers para editar e deletar questionário (mock)
+  const handleEditQuestionario = (questionario) => {
+    console.log("Editando questionário:", questionario);
+    toast.info(`Editando questionário ${questionario.nome}`);
+  };
+
+  const handleDeleteQuestionario = (questionario) => {
+    console.log("Deletando questionário:", questionario);
+    toast.warning(`Questionário ${questionario.nome} removido`);
   };
 
   if (pacienteLoading) {
@@ -328,10 +349,20 @@ const AdminPacienteEdit = () => {
                       </Button>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-green-600"
+                        onClick={() => handleEditSessao(sessao)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-red-600"
+                        onClick={() => handleDeleteSessao(sessao)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -428,10 +459,20 @@ const AdminPacienteEdit = () => {
                     </div>
                     <div className="text-gray-600">{questionario.data}</div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-green-600"
+                        onClick={() => handleEditQuestionario(questionario)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-red-600"
+                        onClick={() => handleDeleteQuestionario(questionario)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
