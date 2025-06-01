@@ -51,6 +51,11 @@ const AdminQuestionarios = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [selectedQuestionario, setSelectedQuestionario] = useState<any>(null);
+  const [editingQuestionario, setEditingQuestionario] = useState<any>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [questionarioToDelete, setQuestionarioToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
@@ -164,19 +169,48 @@ const AdminQuestionarios = () => {
     setSelectedQuestionario(null);
   };
 
-  const handleEdit = (id: number) => {
-    toast({
-      title: "Editar questionário",
-      description: `Funcionalidade de edição será implementada.`,
+  const handleEdit = (questionario: any) => {
+    setEditingQuestionario(questionario);
+    setFormData({
+      titulo: questionario.titulo,
+      descricao: questionario.descricao,
+      tipo: questionario.tipo,
+      estimativa_tempo: questionario.estimativa_tempo
     });
+    setShowEditDialog(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (questionario: any) => {
+    setQuestionarioToDelete(questionario);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (questionarioToDelete) {
+      toast({
+        title: "Questionário removido",
+        description: `${questionarioToDelete.titulo} foi removido do sistema.`,
+        variant: "destructive"
+      });
+      setShowDeleteDialog(false);
+      setQuestionarioToDelete(null);
+    }
+  };
+
+  const handleView = (questionario: any) => {
+    setSelectedQuestionario(questionario);
+    setShowViewDialog(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     toast({
-      title: "Questionário removido",
-      description: "Questionário foi removido do sistema.",
-      variant: "destructive"
+      title: "Questionário atualizado",
+      description: `${formData.titulo} foi atualizado com sucesso.`,
     });
+    setShowEditDialog(false);
+    setEditingQuestionario(null);
+    setFormData({ titulo: "", descricao: "", tipo: "", estimativa_tempo: "" });
   };
 
   const openAssignDialog = (questionario: any) => {
@@ -343,13 +377,17 @@ const AdminQuestionarios = () => {
                     <TableCell>{questionario.criado_em}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleView(questionario)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleEdit(questionario.id)}
+                          onClick={() => handleEdit(questionario)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -364,7 +402,7 @@ const AdminQuestionarios = () => {
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleDelete(questionario.id)}
+                          onClick={() => handleDelete(questionario)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -425,6 +463,153 @@ const AdminQuestionarios = () => {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Visualização */}
+        <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Detalhes do Questionário</DialogTitle>
+            </DialogHeader>
+            {selectedQuestionario && (
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="font-semibold">Título</Label>
+                    <p className="text-gray-700">{selectedQuestionario.titulo}</p>
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Tipo</Label>
+                    <Badge className={
+                      selectedQuestionario.tipo === "Formulário" 
+                        ? "bg-blue-100 text-blue-800" 
+                        : selectedQuestionario.tipo === "Escala"
+                        ? "bg-green-100 text-green-800"
+                        : selectedQuestionario.tipo === "Teste Neuropsicológico"
+                        ? "bg-purple-100 text-purple-800"
+                        : selectedQuestionario.tipo === "Inventário"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-gray-100 text-gray-800"
+                    }>
+                      {selectedQuestionario.tipo}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="font-semibold">Descrição</Label>
+                  <p className="text-gray-700">{selectedQuestionario.descricao}</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="font-semibold">Tempo Estimado</Label>
+                    <p className="text-gray-700">{selectedQuestionario.estimativa_tempo}</p>
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Data de Criação</Label>
+                    <p className="text-gray-700">{selectedQuestionario.criado_em}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+                    Fechar
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Edição */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Questionário</DialogTitle>
+              <DialogDescription>
+                Edite as informações do questionário
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_titulo">Título</Label>
+                  <Input
+                    id="edit_titulo"
+                    value={formData.titulo}
+                    onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_tipo">Tipo</Label>
+                  <Select value={formData.tipo} onValueChange={(value) => setFormData({...formData, tipo: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Formulário">Formulário</SelectItem>
+                      <SelectItem value="Escala">Escala</SelectItem>
+                      <SelectItem value="Teste Neuropsicológico">Teste Neuropsicológico</SelectItem>
+                      <SelectItem value="Questionário">Questionário</SelectItem>
+                      <SelectItem value="Inventário">Inventário</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit_descricao">Descrição</Label>
+                <Textarea
+                  id="edit_descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_estimativa_tempo">Estimativa de Tempo</Label>
+                <Input
+                  id="edit_estimativa_tempo"
+                  placeholder="Ex: 20 min"
+                  value={formData.estimativa_tempo}
+                  onChange={(e) => setFormData({...formData, estimativa_tempo: e.target.value})}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Salvar Alterações
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowEditDialog(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Confirmação de Exclusão */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja excluir o questionário "{questionarioToDelete?.titulo}"? Esta ação não pode ser desfeita.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex space-x-2 justify-end">
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={confirmDelete}
+              >
+                Excluir
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

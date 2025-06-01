@@ -52,6 +52,11 @@ const AdminSessoes = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [selectedSessao, setSelectedSessao] = useState<any>(null);
+  const [editingSessao, setEditingSessao] = useState<any>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [sessaoToDelete, setSessaoToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
@@ -189,19 +194,52 @@ const AdminSessoes = () => {
     setShowPlanForm(false);
   };
 
-  const handleEdit = (id: number) => {
-    toast({
-      title: "Editar sessão",
-      description: `Funcionalidade de edição será implementada.`,
+  const handleEdit = (sessao: any) => {
+    setEditingSessao(sessao);
+    setFormData({
+      nome: sessao.nome,
+      descricao: sessao.descricao,
+      orientacoes: sessao.orientacoes,
+      responsavel: sessao.responsavel,
+      duracao_estimada: sessao.duracao_estimada,
+      tipo: sessao.tipo,
+      testes_selecionados: [],
+      testes_visiveis_paciente: true
     });
+    setShowEditDialog(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (sessao: any) => {
+    setSessaoToDelete(sessao);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (sessaoToDelete) {
+      toast({
+        title: "Sessão removida",
+        description: `${sessaoToDelete.nome} foi removida do sistema.`,
+        variant: "destructive"
+      });
+      setShowDeleteDialog(false);
+      setSessaoToDelete(null);
+    }
+  };
+
+  const handleView = (sessao: any) => {
+    setSelectedSessao(sessao);
+    setShowViewDialog(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     toast({
-      title: "Sessão removida",
-      description: "Sessão foi removida do sistema.",
-      variant: "destructive"
+      title: "Sessão atualizada",
+      description: `${formData.nome} foi atualizada com sucesso.`,
     });
+    setShowEditDialog(false);
+    setEditingSessao(null);
+    setFormData({ nome: "", descricao: "", orientacoes: "", responsavel: "", duracao_estimada: "", tipo: "", testes_selecionados: [], testes_visiveis_paciente: true });
   };
 
   const toggleSessaoSelection = (sessaoId: number) => {
@@ -430,13 +468,17 @@ const AdminSessoes = () => {
                     <TableCell className="max-w-xs truncate">{sessao.descricao}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleView(sessao)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleEdit(sessao.id)}
+                          onClick={() => handleEdit(sessao)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -444,7 +486,7 @@ const AdminSessoes = () => {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => handleDelete(sessao.id)}
+                            onClick={() => handleDelete(sessao)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -520,6 +562,149 @@ const AdminSessoes = () => {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Visualização */}
+        <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Detalhes da Sessão</DialogTitle>
+            </DialogHeader>
+            {selectedSessao && (
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="font-semibold">Nome da Sessão</Label>
+                    <p className="text-gray-700">{selectedSessao.nome}</p>
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Tipo</Label>
+                    <Badge className={selectedSessao.tipo === "Pré-definida" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"}>
+                      {selectedSessao.tipo}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="font-semibold">Descrição</Label>
+                  <p className="text-gray-700">{selectedSessao.descricao}</p>
+                </div>
+                <div>
+                  <Label className="font-semibold">Orientações para o Paciente</Label>
+                  <p className="text-gray-700">{selectedSessao.orientacoes}</p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="font-semibold">Responsável</Label>
+                    <p className="text-gray-700">{selectedSessao.responsavel}</p>
+                  </div>
+                  <div>
+                    <Label className="font-semibold">Duração Estimada</Label>
+                    <p className="text-gray-700">{selectedSessao.duracao_estimada}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => setShowViewDialog(false)}>
+                    Fechar
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Edição */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Sessão</DialogTitle>
+              <DialogDescription>
+                Edite as informações da sessão
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_nome">Nome da Sessão</Label>
+                  <Input
+                    id="edit_nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_responsavel">Responsável</Label>
+                  <Input
+                    id="edit_responsavel"
+                    value={formData.responsavel}
+                    onChange={(e) => setFormData({...formData, responsavel: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit_descricao">Descrição</Label>
+                <Textarea
+                  id="edit_descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_orientacoes">Orientações para o Paciente</Label>
+                <Textarea
+                  id="edit_orientacoes"
+                  value={formData.orientacoes}
+                  onChange={(e) => setFormData({...formData, orientacoes: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_duracao_estimada">Duração Estimada</Label>
+                <Input
+                  id="edit_duracao_estimada"
+                  placeholder="Ex: 90 min"
+                  value={formData.duracao_estimada}
+                  onChange={(e) => setFormData({...formData, duracao_estimada: e.target.value})}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Salvar Alterações
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowEditDialog(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diálogo de Confirmação de Exclusão */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja excluir a sessão "{sessaoToDelete?.nome}"? Esta ação não pode ser desfeita.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex space-x-2 justify-end">
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={confirmDelete}
+              >
+                Excluir
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
