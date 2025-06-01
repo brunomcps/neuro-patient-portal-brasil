@@ -923,7 +923,10 @@ const AdminPacienteEdit = () => {
                 </div>
                 <Dialog open={showNovoPagamento} onOpenChange={setShowNovoPagamento}>
                   <DialogTrigger asChild>
-                    <Button className="bg-gray-800 hover:bg-gray-900">
+                    <Button 
+                      className="bg-gray-800 hover:bg-gray-900"
+                      onClick={() => setShowNovoPagamento(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Pagamento
                     </Button>
@@ -964,7 +967,7 @@ const AdminPacienteEdit = () => {
                             <SelectValue placeholder="Selecione uma sessão" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Nenhuma sessão específica</SelectItem>
+                            <SelectItem value="none">Nenhuma sessão específica</SelectItem>
                             {sessoesMock.map((sessao) => (
                               <SelectItem key={sessao.id} value={sessao.id.toString()}>
                                 {sessao.nome} - {sessao.data}
@@ -987,63 +990,58 @@ const AdminPacienteEdit = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="space-y-4">
+              <div className="overflow-hidden">
+                <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                  <div>Descrição</div>
+                  <div>Valor</div>
+                  <div>Vencimento</div>
+                  <div>Status</div>
+                  <div>Sessão Relacionada</div>
+                  <div>Ações</div>
+                </div>
                 {pagamentosMock.map((pagamento) => (
-                  <div key={pagamento.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">{pagamento.descricao}</h4>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={
-                            pagamento.status === "pago" ? "default" : 
-                            pagamento.status === "pendente" ? "secondary" : "destructive"
-                          }>
-                            {pagamento.status === "pago" ? "Pago" : 
-                             pagamento.status === "pendente" ? "Pendente" : "Atrasado"}
-                          </Badge>
-                          <span className="text-lg font-bold text-green-600">
-                            R$ {pagamento.valor.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                        <div>
-                          <span className="font-medium">Vencimento:</span> {pagamento.vencimento}
-                        </div>
-                        <div>
-                          <span className="font-medium">Método:</span> {pagamento.metodo || "Não definido"}
-                        </div>
-                        {pagamento.sessao_nome && (
-                          <div className="col-span-2">
-                            <span className="font-medium">Sessão:</span> {pagamento.sessao_nome}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleEditPayment(pagamento)}
-                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Gerenciar
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            if (confirm(`Tem certeza que deseja remover o pagamento "${pagamento.descricao}"?`)) {
-                              console.log("Deletando pagamento:", pagamento);
-                              toast.success(`Pagamento ${pagamento.descricao} removido com sucesso`);
-                            }
-                          }}
-                          className="text-red-600 border-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Remover
-                        </Button>
-                      </div>
+                  <div key={pagamento.id} className="grid grid-cols-6 gap-4 p-4 border-b hover:bg-gray-50">
+                    <div className="font-medium">{pagamento.descricao}</div>
+                    <div className="text-green-600 font-semibold">R$ {pagamento.valor.toFixed(2)}</div>
+                    <div className="text-gray-600">{pagamento.vencimento}</div>
+                    <div>
+                      <Badge variant={
+                        pagamento.status === "pago" ? "default" : 
+                        pagamento.status === "pendente" ? "secondary" : "destructive"
+                      }>
+                        {pagamento.status === "pago" ? "Pago" : 
+                         pagamento.status === "pendente" ? "Pendente" : "Atrasado"}
+                      </Badge>
+                    </div>
+                    <div className="text-gray-600">
+                      {pagamento.sessao_nome || (
+                        <span className="text-gray-400 italic">Nenhuma sessão</span>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-green-600"
+                        onClick={() => handleEditPayment(pagamento)}
+                        title="Gerenciar Pagamento"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-gray-600 hover:text-red-600"
+                        onClick={() => {
+                          if (confirm(`Tem certeza que deseja remover o pagamento "${pagamento.descricao}"?`)) {
+                            console.log("Deletando pagamento:", pagamento);
+                            toast.success(`Pagamento ${pagamento.descricao} removido com sucesso`);
+                          }
+                        }}
+                        title="Remover Pagamento"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
