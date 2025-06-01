@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Table,
   TableBody,
@@ -39,23 +41,26 @@ import {
   ArrowLeft,
   Clock,
   User,
-  Video
+  Video,
+  MapPin
 } from "lucide-react";
 import Header from "@/components/Header";
 import { toast } from "@/hooks/use-toast";
+import { usePacientes } from "@/hooks/usePacientes";
 
 const AdminAgendamentos = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const { data: pacientes = [], isLoading } = usePacientes();
+  
   const [formData, setFormData] = useState({
-    paciente: "",
+    paciente_id: "",
     data: "",
     horario: "",
     tipo: "",
     modalidade: "online",
-    local: "",
     link: ""
   });
 
@@ -75,7 +80,7 @@ const AdminAgendamentos = () => {
     setUser(parsedUser);
   }, [navigate]);
 
-  // Dados de demonstração
+  // Dados de demonstração atualizados com modalidade
   const agendamentos = [
     {
       id: 1,
@@ -83,8 +88,10 @@ const AdminAgendamentos = () => {
       data: "2024-02-05",
       horario: "09:00",
       tipo: "Sessão de Avaliação Comportamental",
+      modalidade: "online",
       status: "Confirmado",
-      link: "https://meet.google.com/abc-def-ghi"
+      link: "https://meet.google.com/abc-def-ghi",
+      endereco: null
     },
     {
       id: 2,
@@ -92,8 +99,10 @@ const AdminAgendamentos = () => {
       data: "2024-02-05",
       horario: "14:00",
       tipo: "Sessão Inicial",
+      modalidade: "presencial_copacabana",
       status: "Pendente",
-      link: "https://meet.google.com/def-ghi-jkl"
+      link: null,
+      endereco: "Rua Barata Ribeiro, 200 - Copacabana, Rio de Janeiro/RJ"
     },
     {
       id: 3,
@@ -101,8 +110,10 @@ const AdminAgendamentos = () => {
       data: "2024-02-06",
       horario: "10:30",
       tipo: "Sessão de Alinhamento Diagnóstico",
+      modalidade: "presencial_leblon",
       status: "Confirmado",
-      link: "https://meet.google.com/ghi-jkl-mno"
+      link: null,
+      endereco: "Rua Dias Ferreira, 100 - Leblon, Rio de Janeiro/RJ"
     },
     {
       id: 4,
@@ -110,8 +121,10 @@ const AdminAgendamentos = () => {
       data: "2024-02-07",
       horario: "16:00",
       tipo: "Devolutiva",
+      modalidade: "online",
       status: "Confirmado",
-      link: "https://meet.google.com/jkl-mno-pqr"
+      link: "https://meet.google.com/jkl-mno-pqr",
+      endereco: null
     }
   ];
 
@@ -123,6 +136,28 @@ const AdminAgendamentos = () => {
     "Devolutiva"
   ];
 
+  const modalidades = [
+    { value: "online", label: "Online" },
+    { value: "presencial_copacabana", label: "Presencial - Copacabana" },
+    { value: "presencial_leblon", label: "Presencial - Leblon" }
+  ];
+
+  const getEndereco = (modalidade: string) => {
+    switch (modalidade) {
+      case "presencial_copacabana":
+        return "Rua Barata Ribeiro, 200 - Copacabana, Rio de Janeiro/RJ";
+      case "presencial_leblon":
+        return "Rua Dias Ferreira, 100 - Leblon, Rio de Janeiro/RJ";
+      default:
+        return null;
+    }
+  };
+
+  const getModalidadeLabel = (modalidade: string) => {
+    const mod = modalidades.find(m => m.value === modalidade);
+    return mod ? mod.label : modalidade;
+  };
+
   const filteredAgendamentos = agendamentos.filter(agendamento =>
     agendamento.paciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     agendamento.tipo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -130,11 +165,13 @@ const AdminAgendamentos = () => {
 
   const handleAddAgendamento = (e: React.FormEvent) => {
     e.preventDefault();
+    const pacienteSelecionado = pacientes.find(p => p.id === formData.paciente_id);
+    
     toast({
       title: "Agendamento criado",
-      description: `Agendamento para ${formData.paciente} foi criado com sucesso.`,
+      description: `Agendamento para ${pacienteSelecionado?.usuarios?.nome || 'paciente'} foi criado com sucesso.`,
     });
-    setFormData({ paciente: "", data: "", horario: "", tipo: "", modalidade: "online", local: "", link: "" });
+    setFormData({ paciente_id: "", data: "", horario: "", tipo: "", modalidade: "online", link: "" });
     setShowAddForm(false);
   };
 
@@ -147,14 +184,14 @@ const AdminAgendamentos = () => {
     const agendamento = agendamentos.find(a => a.id === id);
     if (agendamento) {
       setEditingAgendamento(agendamento);
+      const paciente = pacientes.find(p => p.usuarios?.nome === agendamento.paciente);
       setFormData({
-        paciente: agendamento.paciente,
+        paciente_id: paciente?.id || "",
         data: agendamento.data,
         horario: agendamento.horario,
         tipo: agendamento.tipo,
-        modalidade: "online",
-        local: "",
-        link: agendamento.link
+        modalidade: agendamento.modalidade,
+        link: agendamento.link || ""
       });
       setShowEditForm(true);
     }
@@ -170,11 +207,13 @@ const AdminAgendamentos = () => {
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const pacienteSelecionado = pacientes.find(p => p.id === formData.paciente_id);
+    
     toast({
       title: "Agendamento atualizado",
-      description: `Agendamento de ${formData.paciente} foi atualizado com sucesso.`,
+      description: `Agendamento de ${pacienteSelecionado?.usuarios?.nome || 'paciente'} foi atualizado com sucesso.`,
     });
-    setFormData({ paciente: "", data: "", horario: "", tipo: "", modalidade: "online", local: "", link: "" });
+    setFormData({ paciente_id: "", data: "", horario: "", tipo: "", modalidade: "online", link: "" });
     setShowEditForm(false);
     setEditingAgendamento(null);
   };
@@ -235,30 +274,34 @@ const AdminAgendamentos = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="paciente">Paciente</Label>
-                    <Input
-                      id="paciente"
-                      value={formData.paciente}
-                      onChange={(e) => setFormData({...formData, paciente: e.target.value})}
-                      placeholder="Nome do paciente"
-                      required
-                    />
+                    <Select value={formData.paciente_id} onValueChange={(value) => setFormData({...formData, paciente_id: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um paciente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pacientes.map((paciente) => (
+                          <SelectItem key={paciente.id} value={paciente.id}>
+                            {paciente.usuarios?.nome} - {paciente.usuarios?.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="tipo">Tipo de Sessão</Label>
-                    <select 
-                      className="w-full p-2 border border-gray-200 rounded-md"
-                      value={formData.tipo}
-                      onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-                      required
-                    >
-                      <option value="">Selecione o tipo</option>
-                      {tipos.map(tipo => (
-                        <option key={tipo} value={tipo}>{tipo}</option>
-                      ))}
-                    </select>
+                    <Select value={formData.tipo} onValueChange={(value) => setFormData({...formData, tipo: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tipos.map(tipo => (
+                          <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="data">Data</Label>
                     <Input
@@ -279,17 +322,40 @@ const AdminAgendamentos = () => {
                       required
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="modalidade">Modalidade</Label>
+                    <Select value={formData.modalidade} onValueChange={(value) => setFormData({...formData, modalidade: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a modalidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {modalidades.map(modalidade => (
+                          <SelectItem key={modalidade.value} value={modalidade.value}>
+                            {modalidade.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="link">Link da Reunião (opcional)</Label>
-                  <Input
-                    id="link"
-                    type="url"
-                    value={formData.link}
-                    onChange={(e) => setFormData({...formData, link: e.target.value})}
-                    placeholder="https://meet.google.com/..."
-                  />
-                </div>
+                {formData.modalidade === "online" && (
+                  <div>
+                    <Label htmlFor="link">Link da Reunião (opcional)</Label>
+                    <Input
+                      id="link"
+                      type="url"
+                      value={formData.link}
+                      onChange={(e) => setFormData({...formData, link: e.target.value})}
+                      placeholder="https://meet.google.com/..."
+                    />
+                  </div>
+                )}
+                {(formData.modalidade === "presencial_copacabana" || formData.modalidade === "presencial_leblon") && (
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <Label className="font-medium">Endereço da Consulta:</Label>
+                    <p className="text-sm text-gray-600 mt-1">{getEndereco(formData.modalidade)}</p>
+                  </div>
+                )}
                 <div className="flex space-x-2">
                   <Button type="submit" className="bg-green-600 hover:bg-green-700">
                     Criar Agendamento
@@ -320,30 +386,34 @@ const AdminAgendamentos = () => {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="edit_paciente">Paciente</Label>
-                  <Input
-                    id="edit_paciente"
-                    value={formData.paciente}
-                    onChange={(e) => setFormData({...formData, paciente: e.target.value})}
-                    placeholder="Nome do paciente"
-                    required
-                  />
+                  <Select value={formData.paciente_id} onValueChange={(value) => setFormData({...formData, paciente_id: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um paciente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pacientes.map((paciente) => (
+                        <SelectItem key={paciente.id} value={paciente.id}>
+                          {paciente.usuarios?.nome} - {paciente.usuarios?.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="edit_tipo">Tipo de Sessão</Label>
-                  <select 
-                    className="w-full p-2 border border-gray-200 rounded-md"
-                    value={formData.tipo}
-                    onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-                    required
-                  >
-                    <option value="">Selecione o tipo</option>
-                    {tipos.map(tipo => (
-                      <option key={tipo} value={tipo}>{tipo}</option>
-                    ))}
-                  </select>
+                  <Select value={formData.tipo} onValueChange={(value) => setFormData({...formData, tipo: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tipos.map(tipo => (
+                        <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="edit_data">Data</Label>
                   <Input
@@ -364,17 +434,40 @@ const AdminAgendamentos = () => {
                     required
                   />
                 </div>
+                <div>
+                  <Label htmlFor="edit_modalidade">Modalidade</Label>
+                  <Select value={formData.modalidade} onValueChange={(value) => setFormData({...formData, modalidade: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a modalidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {modalidades.map(modalidade => (
+                        <SelectItem key={modalidade.value} value={modalidade.value}>
+                          {modalidade.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="edit_link">Link da Reunião (opcional)</Label>
-                <Input
-                  id="edit_link"
-                  type="url"
-                  value={formData.link}
-                  onChange={(e) => setFormData({...formData, link: e.target.value})}
-                  placeholder="https://meet.google.com/..."
-                />
-              </div>
+              {formData.modalidade === "online" && (
+                <div>
+                  <Label htmlFor="edit_link">Link da Reunião (opcional)</Label>
+                  <Input
+                    id="edit_link"
+                    type="url"
+                    value={formData.link}
+                    onChange={(e) => setFormData({...formData, link: e.target.value})}
+                    placeholder="https://meet.google.com/..."
+                  />
+                </div>
+              )}
+              {(formData.modalidade === "presencial_copacabana" || formData.modalidade === "presencial_leblon") && (
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <Label className="font-medium">Endereço da Consulta:</Label>
+                  <p className="text-sm text-gray-600 mt-1">{getEndereco(formData.modalidade)}</p>
+                </div>
+              )}
               <div className="flex space-x-2">
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                   Salvar Alterações
@@ -439,8 +532,9 @@ const AdminAgendamentos = () => {
                   <TableHead>Data</TableHead>
                   <TableHead>Horário</TableHead>
                   <TableHead>Tipo de Sessão</TableHead>
+                  <TableHead>Modalidade</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Link</TableHead>
+                  <TableHead>Acesso</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -458,6 +552,11 @@ const AdminAgendamentos = () => {
                     </TableCell>
                     <TableCell>{agendamento.tipo}</TableCell>
                     <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {getModalidadeLabel(agendamento.modalidade)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                       <Badge 
                         variant={agendamento.status === "Confirmado" ? "default" : "secondary"}
                         className={
@@ -470,12 +569,20 @@ const AdminAgendamentos = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {agendamento.link && (
+                      {agendamento.modalidade === "online" && agendamento.link ? (
                         <Button size="sm" variant="outline" asChild>
                           <a href={agendamento.link} target="_blank" rel="noopener noreferrer">
                             <Video className="h-4 w-4" />
                           </a>
                         </Button>
+                      ) : agendamento.endereco ? (
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(agendamento.endereco)}`} target="_blank" rel="noopener noreferrer">
+                            <MapPin className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell>
