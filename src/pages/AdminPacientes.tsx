@@ -125,6 +125,11 @@ const AdminPacientes = () => {
                   >
                     {isCreatingDemo ? "Criando..." : "Criar Dados de Demonstração"}
                   </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    💡 Se o botão de demonstração não funcionar, você pode executar o script 
+                    <code className="bg-gray-100 px-1 rounded text-xs mx-1">database/insert_demo_data.sql</code> 
+                    diretamente no banco de dados.
+                  </p>
                 </div>
               )}
             </CardContent>
