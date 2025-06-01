@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2, Settings } from "lucide-react";
+import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2, Settings, MapPin, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +24,33 @@ const AdminPacienteEdit = () => {
   const [showNovaSessao, setShowNovaSessao] = useState(false);
   const [showAtribuirQuestionario, setShowAtribuirQuestionario] = useState(false);
   const [showNovoPagamento, setShowNovoPagamento] = useState(false);
+  const [showEditSessao, setShowEditSessao] = useState(false);
+  const [showStatusSessao, setShowStatusSessao] = useState(false);
+  const [selectedSessao, setSelectedSessao] = useState<any>(null);
 
   // Estados para formulários
   const [novaSessaoData, setNovaSessaoData] = useState({
     nome: "",
     data: "",
     horario: "",
+    modalidade: "online",
     link: "",
+    endereco: "",
+    observacoes: ""
+  });
+
+  const [editSessaoData, setEditSessaoData] = useState({
+    nome: "",
+    data: "",
+    horario: "",
+    modalidade: "online",
+    link: "",
+    endereco: "",
+    observacoes: ""
+  });
+
+  const [statusSessaoData, setStatusSessaoData] = useState({
+    status: "",
     observacoes: ""
   });
 
@@ -86,9 +106,36 @@ const AdminPacienteEdit = () => {
 
   // Mock data para demonstração
   const sessoesMock = [
-    { id: 1, nome: "Sessão Inicial", data: "09/01/2024", horario: "14:00", status: "Concluída", link: "#" },
-    { id: 2, nome: "Avaliação Cognitiva", data: "16/01/2024", horario: "14:00", status: "Concluída", link: "#" },
-    { id: 3, nome: "Testes Específicos", data: "14/02/2024", horario: "14:00", status: "Agendada", link: "#" },
+    { 
+      id: 1, 
+      nome: "Sessão Inicial", 
+      data: "09/01/2024", 
+      horario: "14:00", 
+      status: "Concluída", 
+      modalidade: "online",
+      link: "https://meet.google.com/abc-defg-hij",
+      endereco: null
+    },
+    { 
+      id: 2, 
+      nome: "Avaliação Cognitiva", 
+      data: "16/01/2024", 
+      horario: "14:00", 
+      status: "Concluída", 
+      modalidade: "presencial",
+      endereco: "Rua Barata Ribeiro, 370 - Copacabana, Rio de Janeiro/RJ",
+      link: null
+    },
+    { 
+      id: 3, 
+      nome: "Testes Específicos", 
+      data: "14/02/2024", 
+      horario: "14:00", 
+      status: "Agendada", 
+      modalidade: "presencial",
+      endereco: "Rua Dias Ferreira, 190 - Leblon, Rio de Janeiro/RJ",
+      link: null
+    },
   ];
 
   const questionariosMock = [
@@ -119,7 +166,7 @@ const AdminPacienteEdit = () => {
     console.log("Criando sessão:", novaSessaoData);
     toast.success("Sessão criada com sucesso!");
     setShowNovaSessao(false);
-    setNovaSessaoData({ nome: "", data: "", horario: "", link: "", observacoes: "" });
+    setNovaSessaoData({ nome: "", data: "", horario: "", modalidade: "online", link: "", endereco: "", observacoes: "" });
   };
 
   const handleAtribuirQuestionario = () => {
@@ -136,15 +183,69 @@ const AdminPacienteEdit = () => {
     setPagamentoData({ descricao: "", valor: "", vencimento: "" });
   };
 
-  // Handlers para editar e deletar sessão (mock)
+  // Handlers para gerenciar sessões
   const handleEditSessao = (sessao) => {
-    console.log("Editando sessão:", sessao);
-    toast.info(`Editando sessão ${sessao.nome}`);
+    setSelectedSessao(sessao);
+    setEditSessaoData({
+      nome: sessao.nome,
+      data: sessao.data,
+      horario: sessao.horario,
+      modalidade: sessao.modalidade,
+      link: sessao.link || "",
+      endereco: sessao.endereco || "",
+      observacoes: sessao.observacoes || ""
+    });
+    setShowEditSessao(true);
+  };
+
+  const handleStatusSessao = (sessao) => {
+    setSelectedSessao(sessao);
+    setStatusSessaoData({
+      status: sessao.status,
+      observacoes: ""
+    });
+    setShowStatusSessao(true);
   };
 
   const handleDeleteSessao = (sessao) => {
-    console.log("Deletando sessão:", sessao);
-    toast.warning(`Sessão ${sessao.nome} removida`);
+    if (confirm(`Tem certeza que deseja remover a sessão "${sessao.nome}"?`)) {
+      console.log("Deletando sessão:", sessao);
+      toast.success(`Sessão ${sessao.nome} removida com sucesso`);
+    }
+  };
+
+  const handleSaveEditSessao = () => {
+    console.log("Salvando edição da sessão:", editSessaoData);
+    toast.success("Sessão atualizada com sucesso!");
+    setShowEditSessao(false);
+    setSelectedSessao(null);
+  };
+
+  const handleSaveStatusSessao = () => {
+    console.log("Atualizando status da sessão:", statusSessaoData);
+    toast.success("Status da sessão atualizado com sucesso!");
+    setShowStatusSessao(false);
+    setSelectedSessao(null);
+  };
+
+  const getLocalDisplay = (sessao) => {
+    if (sessao.modalidade === "online") {
+      return (
+        <div className="flex items-center gap-1 text-blue-600">
+          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+          Online
+        </div>
+      );
+    } else {
+      const location = sessao.endereco?.includes("Copacabana") ? "Copacabana" : 
+                     sessao.endereco?.includes("Leblon") ? "Leblon" : "Presencial";
+      return (
+        <div className="flex items-center gap-1 text-green-600">
+          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+          {location}
+        </div>
+      );
+    }
   };
 
   // Handlers para editar e deletar questionário (mock)
@@ -408,13 +509,48 @@ const AdminPacienteEdit = () => {
                         </div>
                       </div>
                       <div>
-                        <Label>Link da Reunião</Label>
-                        <Input
-                          value={novaSessaoData.link}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, link: e.target.value }))}
-                          placeholder="https://meet.google.com/..."
-                        />
+                        <Label>Modalidade</Label>
+                        <Select 
+                          value={novaSessaoData.modalidade} 
+                          onValueChange={(value) => setNovaSessaoData(prev => ({ ...prev, modalidade: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a modalidade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="online">Online</SelectItem>
+                            <SelectItem value="copacabana">Presencial - Copacabana</SelectItem>
+                            <SelectItem value="leblon">Presencial - Leblon</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
+                      
+                      {novaSessaoData.modalidade === "online" ? (
+                        <div>
+                          <Label>Link da Reunião</Label>
+                          <Input
+                            value={novaSessaoData.link}
+                            onChange={(e) => setNovaSessaoData(prev => ({ ...prev, link: e.target.value }))}
+                            placeholder="https://meet.google.com/..."
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <Label>Endereço</Label>
+                          <Input
+                            value={
+                              novaSessaoData.modalidade === "copacabana" 
+                                ? "Rua Barata Ribeiro, 370 - Copacabana, Rio de Janeiro/RJ"
+                                : novaSessaoData.modalidade === "leblon"
+                                ? "Rua Dias Ferreira, 190 - Leblon, Rio de Janeiro/RJ"
+                                : novaSessaoData.endereco
+                            }
+                            onChange={(e) => setNovaSessaoData(prev => ({ ...prev, endereco: e.target.value }))}
+                            placeholder="Endereço da consulta"
+                            disabled={novaSessaoData.modalidade === "copacabana" || novaSessaoData.modalidade === "leblon"}
+                          />
+                        </div>
+                      )}
                       <div>
                         <Label>Observações</Label>
                         <Textarea
@@ -438,34 +574,76 @@ const AdminPacienteEdit = () => {
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-hidden">
-                <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
                   <div>Sessão</div>
                   <div>Data/Horário</div>
                   <div>Status</div>
-                  <div>Link da Reunião</div>
+                  <div>Modalidade</div>
+                  <div>Acesso</div>
                   <div>Ações</div>
                 </div>
                 {sessoesMock.map((sessao) => (
-                  <div key={sessao.id} className="grid grid-cols-5 gap-4 p-4 border-b hover:bg-gray-50">
+                  <div key={sessao.id} className="grid grid-cols-6 gap-4 p-4 border-b hover:bg-gray-50">
                     <div className="font-medium">{sessao.nome}</div>
                     <div className="text-gray-600">{sessao.data} às {sessao.horario}</div>
                     <div>
-                      <Badge variant={sessao.status === "Concluída" ? "default" : "outline"}>
+                      <Badge variant={sessao.status === "Concluída" ? "default" : 
+                                    sessao.status === "Agendada" ? "outline" : "secondary"}>
                         {sessao.status}
                       </Badge>
                     </div>
                     <div>
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                        <Link className="w-4 h-4 mr-1" />
-                        Acessar
-                      </Button>
+                      {getLocalDisplay(sessao)}
+                    </div>
+                    <div>
+                      {sessao.modalidade === "online" && sessao.link ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600 hover:text-blue-700"
+                          asChild
+                        >
+                          <a href={sessao.link} target="_blank" rel="noopener noreferrer">
+                            <Link className="w-4 h-4 mr-1" />
+                            Acessar
+                          </a>
+                        </Button>
+                      ) : sessao.modalidade !== "online" && sessao.endereco ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-green-600 hover:text-green-700"
+                          asChild
+                        >
+                          <a 
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sessao.endereco)}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <MapPin className="w-4 h-4 mr-1" />
+                            Ver Local
+                          </a>
+                        </Button>
+                      ) : (
+                        <span className="text-gray-400 text-sm">N/A</span>
+                      )}
                     </div>
                     <div className="flex gap-1">
                       <Button 
                         variant="ghost" 
                         size="sm" 
+                        className="text-gray-600 hover:text-blue-600"
+                        onClick={() => handleStatusSessao(sessao)}
+                        title="Alterar Status"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
                         className="text-gray-600 hover:text-green-600"
                         onClick={() => handleEditSessao(sessao)}
+                        title="Editar Sessão"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -474,6 +652,7 @@ const AdminPacienteEdit = () => {
                         size="sm" 
                         className="text-gray-600 hover:text-red-600"
                         onClick={() => handleDeleteSessao(sessao)}
+                        title="Remover Sessão"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -761,6 +940,157 @@ const AdminPacienteEdit = () => {
           </Card>
         </div>
       )}
+
+      {/* Dialog de Edição de Sessão */}
+      <Dialog open={showEditSessao} onOpenChange={setShowEditSessao}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Sessão</DialogTitle>
+            <DialogDescription>
+              Edite as informações da sessão
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nome da Sessão</Label>
+              <Input
+                value={editSessaoData.nome}
+                onChange={(e) => setEditSessaoData(prev => ({ ...prev, nome: e.target.value }))}
+                placeholder="Ex: Avaliação WISC-V"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Data</Label>
+                <Input
+                  type="date"
+                  value={editSessaoData.data.split('/').reverse().join('-')}
+                  onChange={(e) => setEditSessaoData(prev => ({ ...prev, data: e.target.value.split('-').reverse().join('/') }))}
+                />
+              </div>
+              <div>
+                <Label>Horário</Label>
+                <Input
+                  type="time"
+                  value={editSessaoData.horario}
+                  onChange={(e) => setEditSessaoData(prev => ({ ...prev, horario: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Modalidade</Label>
+              <Select 
+                value={editSessaoData.modalidade} 
+                onValueChange={(value) => setEditSessaoData(prev => ({ ...prev, modalidade: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a modalidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="copacabana">Presencial - Copacabana</SelectItem>
+                  <SelectItem value="leblon">Presencial - Leblon</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {editSessaoData.modalidade === "online" ? (
+              <div>
+                <Label>Link da Reunião</Label>
+                <Input
+                  value={editSessaoData.link}
+                  onChange={(e) => setEditSessaoData(prev => ({ ...prev, link: e.target.value }))}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+            ) : (
+              <div>
+                <Label>Endereço</Label>
+                <Input
+                  value={
+                    editSessaoData.modalidade === "copacabana" 
+                      ? "Rua Barata Ribeiro, 370 - Copacabana, Rio de Janeiro/RJ"
+                      : editSessaoData.modalidade === "leblon"
+                      ? "Rua Dias Ferreira, 190 - Leblon, Rio de Janeiro/RJ"
+                      : editSessaoData.endereco
+                  }
+                  onChange={(e) => setEditSessaoData(prev => ({ ...prev, endereco: e.target.value }))}
+                  placeholder="Endereço da consulta"
+                  disabled={editSessaoData.modalidade === "copacabana" || editSessaoData.modalidade === "leblon"}
+                />
+              </div>
+            )}
+            
+            <div>
+              <Label>Observações</Label>
+              <Textarea
+                value={editSessaoData.observacoes}
+                onChange={(e) => setEditSessaoData(prev => ({ ...prev, observacoes: e.target.value }))}
+                placeholder="Observações sobre a sessão..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveEditSessao} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditSessao(false)} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Alteração de Status */}
+      <Dialog open={showStatusSessao} onOpenChange={setShowStatusSessao}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Alterar Status da Sessão</DialogTitle>
+            <DialogDescription>
+              {selectedSessao && `Altere o status da sessão "${selectedSessao.nome}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Novo Status</Label>
+              <Select 
+                value={statusSessaoData.status} 
+                onValueChange={(value) => setStatusSessaoData(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Agendada">Agendada</SelectItem>
+                  <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                  <SelectItem value="Concluída">Concluída</SelectItem>
+                  <SelectItem value="Cancelada">Cancelada</SelectItem>
+                  <SelectItem value="Reagendada">Reagendada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Observações</Label>
+              <Textarea
+                value={statusSessaoData.observacoes}
+                onChange={(e) => setStatusSessaoData(prev => ({ ...prev, observacoes: e.target.value }))}
+                placeholder="Observações sobre a alteração de status..."
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveStatusSessao} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Save className="w-4 h-4 mr-2" />
+                Alterar Status
+              </Button>
+              <Button variant="outline" onClick={() => setShowStatusSessao(false)} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog de Controle de Pagamentos */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
