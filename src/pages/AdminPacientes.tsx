@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Eye, Edit, Trash2, User, Phone, Mail, Calendar, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import Header from "@/components/Header";
 
 const AdminPacientes = () => {
+  const [user, setUser] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddPatient, setShowAddPatient] = useState(false);
   const [showViewPatient, setShowViewPatient] = useState(false);
@@ -25,6 +27,22 @@ const AdminPacientes = () => {
   
   const navigate = useNavigate();
   const { data: pacientes, isLoading, error } = usePacientes();
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      navigate("/login");
+      return;
+    }
+    
+    const parsedUser = JSON.parse(userData);
+    if (parsedUser.tipo_usuario !== "administrador") {
+      navigate("/dashboard");
+      return;
+    }
+    
+    setUser(parsedUser);
+  }, [navigate]);
 
   console.log("AdminPacientes - Dados carregados:", { pacientes, isLoading, error });
 
@@ -83,8 +101,13 @@ const AdminPacientes = () => {
     );
   }
 
+  if (!user) return null;
+
   return (
-    <div className="container mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <Header user={user} />
+      
+      <div className="container mx-auto p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -403,6 +426,7 @@ const AdminPacientes = () => {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
