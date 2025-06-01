@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +54,8 @@ const AdminAgendamentos = () => {
     data: "",
     horario: "",
     tipo: "",
+    modalidade: "online",
+    local: "",
     link: ""
   });
 
@@ -64,13 +65,13 @@ const AdminAgendamentos = () => {
       navigate("/login");
       return;
     }
-    
+
     const parsedUser = JSON.parse(userData);
     if (parsedUser.tipo_usuario !== "administrador") {
       navigate("/dashboard");
       return;
     }
-    
+
     setUser(parsedUser);
   }, [navigate]);
 
@@ -133,7 +134,7 @@ const AdminAgendamentos = () => {
       title: "Agendamento criado",
       description: `Agendamento para ${formData.paciente} foi criado com sucesso.`,
     });
-    setFormData({ paciente: "", data: "", horario: "", tipo: "", link: "" });
+    setFormData({ paciente: "", data: "", horario: "", tipo: "", modalidade: "online", local: "", link: "" });
     setShowAddForm(false);
   };
 
@@ -151,6 +152,8 @@ const AdminAgendamentos = () => {
         data: agendamento.data,
         horario: agendamento.horario,
         tipo: agendamento.tipo,
+        modalidade: "online",
+        local: "",
         link: agendamento.link
       });
       setShowEditForm(true);
@@ -171,7 +174,7 @@ const AdminAgendamentos = () => {
       title: "Agendamento atualizado",
       description: `Agendamento de ${formData.paciente} foi atualizado com sucesso.`,
     });
-    setFormData({ paciente: "", data: "", horario: "", tipo: "", link: "" });
+    setFormData({ paciente: "", data: "", horario: "", tipo: "", modalidade: "online", local: "", link: "" });
     setShowEditForm(false);
     setEditingAgendamento(null);
   };
@@ -193,7 +196,7 @@ const AdminAgendamentos = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <Header user={user} />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
