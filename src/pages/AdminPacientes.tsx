@@ -8,13 +8,38 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { usePacientes } from "@/hooks/usePacientes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSeedData } from "@/hooks/useSeedData";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminPacientes = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const navigate = useNavigate();
-  const { data: pacientes, isLoading, error } = usePacientes();
+  const { data: pacientes, isLoading, error, refetch } = usePacientes();
+  const { createDemoData } = useSeedData();
+  const { toast } = useToast();
 
   console.log("AdminPacientes - Dados carregados:", { pacientes, isLoading, error });
+
+  const handleCreateDemoData = async () => {
+    setIsCreatingDemo(true);
+    const result = await createDemoData();
+    
+    if (result.success) {
+      toast({
+        title: "Sucesso!",
+        description: result.message,
+      });
+      refetch();
+    } else {
+      toast({
+        title: "Erro",
+        description: result.message,
+        variant: "destructive",
+      });
+    }
+    setIsCreatingDemo(false);
+  };
 
   const filteredPacientes = pacientes?.filter(paciente =>
     paciente.usuarios?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,12 +112,20 @@ const AdminPacientes = () => {
                 {pacientes?.length === 0 ? "Nenhum paciente cadastrado." : "Nenhum paciente encontrado."}
               </p>
               {pacientes?.length === 0 && (
-                <Button 
-                  onClick={() => navigate("/admin/pacientes/novo")} 
-                  className="mt-4"
-                >
-                  Cadastrar Primeiro Paciente
-                </Button>
+                <div className="flex flex-col gap-3 mt-4">
+                  <Button 
+                    onClick={() => navigate("/admin/pacientes/novo")} 
+                  >
+                    Cadastrar Primeiro Paciente
+                  </Button>
+                  <Button 
+                    onClick={handleCreateDemoData}
+                    variant="outline"
+                    disabled={isCreatingDemo}
+                  >
+                    {isCreatingDemo ? "Criando..." : "Criar Dados de Demonstração"}
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

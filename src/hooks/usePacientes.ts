@@ -21,7 +21,7 @@ export interface Paciente {
 }
 
 export const usePacientes = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['pacientes'],
     queryFn: async () => {
       console.log('Buscando pacientes...');
@@ -44,6 +44,11 @@ export const usePacientes = () => {
       return data as Paciente[];
     },
   });
+
+  return {
+    ...query,
+    refetch: query.refetch
+  };
 };
 
 export const usePaciente = (id: string) => {
