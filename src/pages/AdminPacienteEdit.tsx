@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { usePaciente } from "@/hooks/usePacientes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -49,6 +49,11 @@ const AdminPacienteEdit = () => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
+    // Estados para controle de pagamentos
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState("pendente");
+
   // Handler para upload de foto
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,7 +62,7 @@ const AdminPacienteEdit = () => {
         toast.error("Arquivo muito grande. Tamanho máximo: 5MB");
         return;
       }
-      
+
       if (!file.type.startsWith('image/')) {
         toast.error("Por favor, selecione apenas arquivos de imagem");
         return;
@@ -93,9 +98,9 @@ const AdminPacienteEdit = () => {
   ];
 
   const pagamentosMock = [
-    { id: 1, descricao: "Sessão Inicial", valor: "R$ 250,00", vencimento: "09/01/2024", status: "Pago", dataPagamento: "08/01/2024" },
-    { id: 2, descricao: "Avaliação Cognitiva", valor: "R$ 250,00", vencimento: "16/01/2024", status: "Pago", dataPagamento: "15/01/2024" },
-    { id: 3, descricao: "Testes Específicos", valor: "R$ 250,00", vencimento: "14/02/2024", status: "Pendente", dataPagamento: "-" },
+    { id: 1, descricao: "Sessão Inicial", valor: 250.00, vencimento: "09/01/2024", status: "pago", dataPagamento: "08/01/2024" , metodo: "PIX"},
+    { id: 2, descricao: "Avaliação Cognitiva", valor: 250.00, vencimento: "16/01/2024", status: "pago", dataPagamento: "15/01/2024", metodo: "Cartão de Crédito" },
+    { id: 3, descricao: "Testes Específicos", valor: 250.00, vencimento: "14/02/2024", status: "pendente", dataPagamento: "-", metodo: "Boleto" },
   ];
 
   const laudosMock = [
@@ -151,6 +156,20 @@ const AdminPacienteEdit = () => {
   const handleDeleteQuestionario = (questionario) => {
     console.log("Deletando questionário:", questionario);
     toast.warning(`Questionário ${questionario.nome} removido`);
+  };
+
+  // Handler para controle de pagamentos
+  const handlePaymentControl = (pagamento) => {
+    setSelectedPayment(pagamento);
+    setPaymentStatus(pagamento.status);
+    setShowPaymentDialog(true);
+  };
+
+  // Handler para salvar alterações no pagamento
+  const handleSavePayment = () => {
+    console.log("Salvando pagamento:", selectedPayment);
+    toast.success("Pagamento atualizado com sucesso!");
+    setShowPaymentDialog(false);
   };
 
   if (pacienteLoading) {
@@ -255,11 +274,11 @@ const AdminPacienteEdit = () => {
                   <Upload className="w-8 h-8 text-white" />
                 </div>
               </div>
-              
+
               <div className="text-center space-y-2">
                 <h3 className="font-medium text-gray-900">Foto do Paciente</h3>
                 <p className="text-sm text-gray-600">Clique para alterar a foto</p>
-                
+
                 <div className="flex gap-2 justify-center">
                   <label htmlFor="photo-upload" className="cursor-pointer">
                     <Button type="button" className="bg-blue-600 hover:bg-blue-700">
@@ -279,7 +298,7 @@ const AdminPacienteEdit = () => {
                     </Button>
                   )}
                 </div>
-                
+
                 <input
                   id="photo-upload"
                   type="file"
@@ -287,7 +306,7 @@ const AdminPacienteEdit = () => {
                   onChange={handlePhotoUpload}
                   className="hidden"
                 />
-                
+
                 <p className="text-xs text-gray-500">
                   Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB
                 </p>
@@ -641,35 +660,44 @@ const AdminPacienteEdit = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-hidden">
-                <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
-                  <div>Descrição</div>
-                  <div>Valor</div>
-                  <div>Vencimento</div>
-                  <div>Status</div>
-                  <div>Data Pagamento</div>
-                  <div>Ações</div>
-                </div>
+              <div className="space-y-4">
                 {pagamentosMock.map((pagamento) => (
-                  <div key={pagamento.id} className="grid grid-cols-6 gap-4 p-4 border-b hover:bg-gray-50">
-                    <div className="font-medium">{pagamento.descricao}</div>
-                    <div className="font-semibold">{pagamento.valor}</div>
-                    <div className="text-gray-600">{pagamento.vencimento}</div>
-                    <div>
-                      <Badge variant={pagamento.status === "Pago" ? "default" : "outline"}>
-                        {pagamento.status}
-                      </Badge>
-                    </div>
-                    <div className="text-gray-600">{pagamento.dataPagamento}</div>
-                    <div className="flex gap-1">
-                      {pagamento.status === "Pendente" && (
-                        <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
-                          Marcar Pago
+                  <div key={pagamento.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">{pagamento.descricao}</h4>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={
+                            pagamento.status === "pago" ? "default" : 
+                            pagamento.status === "pendente" ? "secondary" : "destructive"
+                          }>
+                            {pagamento.status === "pago" ? "Pago" : 
+                             pagamento.status === "pendente" ? "Pendente" : "Atrasado"}
+                          </Badge>
+                          <span className="text-lg font-bold text-green-600">
+                            R$ {pagamento.valor.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                        <div>
+                          <span className="font-medium">Vencimento:</span> {pagamento.vencimento}
+                        </div>
+                        <div>
+                          <span className="font-medium">Método:</span> {pagamento.metodo || "Não definido"}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handlePaymentControl(pagamento)}
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                        >
+                          <Settings className="w-4 h-4 mr-1" />
+                          Controlar
                         </Button>
-                      )}
-                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600">
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -733,6 +761,92 @@ const AdminPacienteEdit = () => {
           </Card>
         </div>
       )}
+
+      {/* Dialog de Controle de Pagamentos */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Controle de Pagamento</DialogTitle>
+            <DialogDescription>
+              Gerencie o status e informações do pagamento
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPayment && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900">{selectedPayment.descricao}</h4>
+                <p className="text-sm text-gray-600">Valor: R$ {selectedPayment.valor.toFixed(2)}</p>
+                <p className="text-sm text-gray-600">Vencimento: {selectedPayment.vencimento}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-status">Status do Pagamento</Label>
+                <Select onValueChange={setPaymentStatus}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione um status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="pago">Pago</SelectItem>
+                        <SelectItem value="atrasado">Atrasado</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-method">Método de Pagamento</Label>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione o método" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                    <SelectItem value="transferencia">Transferência Bancária</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-date">Data do Pagamento</Label>
+                <Input
+                  id="payment-date"
+                  type="date"
+                  placeholder="Data do pagamento"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment-notes">Observações</Label>
+                <Textarea
+                  id="payment-notes"
+                  placeholder="Observações sobre o pagamento..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={handleSavePayment}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPaymentDialog(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
