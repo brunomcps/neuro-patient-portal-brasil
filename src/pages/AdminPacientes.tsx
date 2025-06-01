@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Search, Eye, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, User, Phone, Mail, Calendar, MapPin, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 const AdminPacientes = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddPatient, setShowAddPatient] = useState(false);
+  const [showViewPatient, setShowViewPatient] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [newPatient, setNewPatient] = useState({
     nome: "",
     email: "",
@@ -36,6 +38,11 @@ const AdminPacientes = () => {
     console.log("Adicionando paciente:", newPatient);
     setShowAddPatient(false);
     setNewPatient({ nome: "", email: "", senha: "" });
+  };
+
+  const handleViewPatient = (paciente: any) => {
+    setSelectedPatient(paciente);
+    setShowViewPatient(true);
   };
 
   const getProgressoSessoes = (paciente: any) => {
@@ -224,8 +231,9 @@ const AdminPacientes = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(`/admin/pacientes/edit/${paciente.id}`)}
+                      onClick={() => handleViewPatient(paciente)}
                       className="text-gray-600 hover:text-blue-600"
+                      title="Visualizar informações"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -234,6 +242,7 @@ const AdminPacientes = () => {
                       size="sm"
                       onClick={() => navigate(`/admin/pacientes/edit/${paciente.id}`)}
                       className="text-gray-600 hover:text-green-600"
+                      title="Editar paciente"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -241,6 +250,7 @@ const AdminPacientes = () => {
                       variant="ghost"
                       size="sm"
                       className="text-gray-600 hover:text-red-600"
+                      title="Excluir paciente"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -251,6 +261,148 @@ const AdminPacientes = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Visualização do Paciente */}
+      <Dialog open={showViewPatient} onOpenChange={setShowViewPatient}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">{selectedPatient?.usuarios?.nome}</h3>
+                <p className="text-sm text-gray-600">Informações do Paciente</p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedPatient && (
+            <div className="space-y-6">
+              {/* Informações Pessoais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Mail className="w-4 h-4 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">E-mail</p>
+                      <p className="text-sm text-gray-600">{selectedPatient.usuarios?.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Phone className="w-4 h-4 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Telefone</p>
+                      <p className="text-sm text-gray-600">{selectedPatient.usuarios?.telefone || '(11) 99999-1111'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Calendar className="w-4 h-4 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Data de Nascimento</p>
+                      <p className="text-sm text-gray-600">
+                        {selectedPatient.usuarios?.data_nascimento 
+                          ? new Date(selectedPatient.usuarios.data_nascimento).toLocaleDateString('pt-BR')
+                          : '15/03/1985'
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <MapPin className="w-4 h-4 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Endereço</p>
+                      <p className="text-sm text-gray-600">{selectedPatient.usuarios?.endereco || 'Não informado'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status e Progresso */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-gray-900 mb-3">Status do Tratamento</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm font-medium text-blue-900">Status</p>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedPatient.status)}
+                    </div>
+                  </div>
+                  
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm font-medium text-green-900">Progresso</p>
+                    <p className="text-sm text-green-700 mt-1">{getProgressoSessoes(selectedPatient)}</p>
+                  </div>
+                  
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <p className="text-sm font-medium text-orange-900">Data Cadastro</p>
+                    <p className="text-sm text-orange-700 mt-1">
+                      {selectedPatient.created_at 
+                        ? new Date(selectedPatient.created_at).toLocaleDateString('pt-BR')
+                        : '15/01/2024'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Observações */}
+              {selectedPatient.observacoes && (
+                <div className="border-t pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="w-4 h-4 text-gray-600" />
+                    <h4 className="font-medium text-gray-900">Observações</h4>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-700">{selectedPatient.observacoes}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Contato de Emergência */}
+              {(selectedPatient.responsavel_nome || selectedPatient.responsavel_telefone) && (
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-gray-900 mb-3">Contato de Emergência</h4>
+                  <div className="p-3 bg-red-50 rounded-lg">
+                    <p className="text-sm font-medium text-red-900">
+                      {selectedPatient.responsavel_nome || 'Responsável'}
+                    </p>
+                    <p className="text-sm text-red-700">
+                      {selectedPatient.responsavel_telefone || 'Telefone não informado'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Botões de Ação */}
+              <div className="border-t pt-4 flex gap-2">
+                <Button 
+                  onClick={() => {
+                    setShowViewPatient(false);
+                    navigate(`/admin/pacientes/edit/${selectedPatient.id}`);
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Paciente
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowViewPatient(false)}
+                  className="flex-1"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
