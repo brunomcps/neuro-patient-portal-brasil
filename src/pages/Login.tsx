@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,14 +26,14 @@ const Login = () => {
     // Simular autenticação
     setTimeout(() => {
       const user = users.find(u => u.email === email && u.senha === senha);
-      
+
       if (user) {
         localStorage.setItem("user", JSON.stringify(user));
         toast({
           title: "Login realizado com sucesso!",
           description: `Bem-vindo(a), ${user.nome}`,
         });
-        
+
         if (user.tipo_usuario === "administrador") {
           navigate("/admin");
         } else {
@@ -47,7 +46,7 @@ const Login = () => {
           variant: "destructive"
         });
       }
-      
+
       setLoading(false);
     }, 1000);
   };
@@ -94,7 +93,7 @@ const Login = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="senha" className="text-gray-700">Senha</Label>
                 <div className="relative">
