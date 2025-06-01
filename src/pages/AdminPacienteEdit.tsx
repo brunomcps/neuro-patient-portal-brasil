@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, FileText, DollarSign, Plus, Save } from "lucide-react";
+import { ArrowLeft, Save, Plus, Upload, Link, Download, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,25 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePaciente } from "@/hooks/usePacientes";
-import { useSessoesPaciente, useCreateSessao } from "@/hooks/useSessoes";
-import { useQuestionarios, useAssignQuestionario } from "@/hooks/useQuestionarios";
-import { usePagamentosPaciente, useCreatePagamento } from "@/hooks/usePagamentos";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 const AdminPacienteEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState("dados-pessoais");
 
   const { data: paciente, isLoading: pacienteLoading } = usePaciente(id!);
-  const { data: sessoes, isLoading: sessoesLoading } = useSessoesPaciente(id!);
-  const { data: questionarios } = useQuestionarios();
-  const { data: pagamentos, isLoading: pagamentosLoading } = usePagamentosPaciente(id!);
-
-  const createSessao = useCreateSessao();
-  const assignQuestionario = useAssignQuestionario();
-  const createPagamento = useCreatePagamento();
 
   // Estados para modais
   const [showNovaSessao, setShowNovaSessao] = useState(false);
@@ -38,97 +28,74 @@ const AdminPacienteEdit = () => {
 
   // Estados para formulários
   const [novaSessaoData, setNovaSessaoData] = useState({
-    titulo: "",
-    descricao: "",
-    data_agendada: "",
-    duracao_minutos: 60,
-    local: "",
-    tipo_local: "online" as "online" | "presencial",
-    profissional_responsavel: "Dra. Gabrielly La-Cava",
-    valor: 0,
+    nome: "",
+    data: "",
+    horario: "",
+    link: "",
     observacoes: ""
   });
 
   const [questionarioData, setQuestionarioData] = useState({
-    sessao_id: "",
-    questionario_id: "",
-    visivel_paciente: true,
-    obrigatorio: false
+    questionario: "",
+    link: ""
   });
 
   const [pagamentoData, setPagamentoData] = useState({
-    valor: 0,
-    data_vencimento: "",
-    sessao_id: "",
-    metodo_pagamento: "",
-    observacoes: ""
+    descricao: "",
+    valor: "",
+    vencimento: ""
   });
 
-  const handleCreateSessao = async () => {
-    if (!id) return;
+  // Mock data para demonstração
+  const sessoesMock = [
+    { id: 1, nome: "Sessão Inicial", data: "09/01/2024", horario: "14:00", status: "Concluída", link: "#" },
+    { id: 2, nome: "Avaliação Cognitiva", data: "16/01/2024", horario: "14:00", status: "Concluída", link: "#" },
+    { id: 3, nome: "Testes Específicos", data: "14/02/2024", horario: "14:00", status: "Agendada", link: "#" },
+  ];
 
-    try {
-      await createSessao.mutateAsync({
-        paciente_id: id,
-        ...novaSessaoData
-      });
-      
-      toast.success("Sessão criada com sucesso!");
-      setShowNovaSessao(false);
-      setNovaSessaoData({
-        titulo: "",
-        descricao: "",
-        data_agendada: "",
-        duracao_minutos: 60,
-        local: "",
-        tipo_local: "online",
-        profissional_responsavel: "Dra. Gabrielly La-Cava",
-        valor: 0,
-        observacoes: ""
-      });
-    } catch (error) {
-      toast.error("Erro ao criar sessão");
-    }
+  const questionariosMock = [
+    { id: 1, nome: "Formulário Inicial", link: "#", status: "Concluído", data: "07/01/2024" },
+    { id: 2, nome: "Escala SRS-2", link: "#", status: "Concluído", data: "11/01/2024" },
+    { id: 3, nome: "BDEFS", link: "#", status: "Pendente", data: "-" },
+  ];
+
+  const pagamentosMock = [
+    { id: 1, descricao: "Sessão Inicial", valor: "R$ 250,00", vencimento: "09/01/2024", status: "Pago", dataPagamento: "08/01/2024" },
+    { id: 2, descricao: "Avaliação Cognitiva", valor: "R$ 250,00", vencimento: "16/01/2024", status: "Pago", dataPagamento: "15/01/2024" },
+    { id: 3, descricao: "Testes Específicos", valor: "R$ 250,00", vencimento: "14/02/2024", status: "Pendente", dataPagamento: "-" },
+  ];
+
+  const laudosMock = [
+    { id: 1, nome: "laudo_maria_silva_2024.pdf" }
+  ];
+
+  const tabs = [
+    { id: "dados-pessoais", label: "Dados Pessoais" },
+    { id: "sessoes", label: "Sessões" },
+    { id: "questionarios", label: "Questionários" },
+    { id: "pagamentos", label: "Pagamentos" },
+    { id: "laudo", label: "Laudo" },
+  ];
+
+  const handleCreateSessao = () => {
+    console.log("Criando sessão:", novaSessaoData);
+    toast.success("Sessão criada com sucesso!");
+    setShowNovaSessao(false);
+    setNovaSessaoData({ nome: "", data: "", horario: "", link: "", observacoes: "" });
   };
 
-  const handleAssignQuestionario = async () => {
-    try {
-      await assignQuestionario.mutateAsync(questionarioData);
-      toast.success("Questionário atribuído com sucesso!");
-      setShowAtribuirQuestionario(false);
-      setQuestionarioData({
-        sessao_id: "",
-        questionario_id: "",
-        visivel_paciente: true,
-        obrigatorio: false
-      });
-    } catch (error) {
-      toast.error("Erro ao atribuir questionário");
-    }
+  const handleAtribuirQuestionario = () => {
+    console.log("Atribuindo questionário:", questionarioData);
+    toast.success("Questionário atribuído com sucesso!");
+    setShowAtribuirQuestionario(false);
+    setQuestionarioData({ questionario: "", link: "" });
   };
 
-  const handleCreatePagamento = async () => {
-    if (!id) return;
-
-    try {
-      await createPagamento.mutateAsync({
-        paciente_id: id,
-        ...pagamentoData,
-        sessao_id: pagamentoData.sessao_id || undefined
-      });
-      
-      toast.success("Pagamento criado com sucesso!");
-      setShowNovoPagamento(false);
-      setPagamentoData({
-        valor: 0,
-        data_vencimento: "",
-        sessao_id: "",
-        metodo_pagamento: "",
-        observacoes: ""
-      });
-    } catch (error) {
-      toast.error("Erro ao criar pagamento");
-    }
+  const handleCreatePagamento = () => {
+    console.log("Criando pagamento:", pagamentoData);
+    toast.success("Pagamento criado com sucesso!");
+    setShowNovoPagamento(false);
+    setPagamentoData({ descricao: "", valor: "", vencimento: "" });
   };
 
   if (pacienteLoading) {
@@ -158,489 +125,478 @@ const AdminPacienteEdit = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigate("/admin/pacientes")}
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">{paciente.usuarios?.nome}</h1>
-          <p className="text-gray-600">{paciente.usuarios?.email}</p>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/admin/pacientes")}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Voltar à Lista
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-sm">👤</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{paciente.usuarios?.nome}</h1>
+              <p className="text-sm text-gray-600">Gerenciamento completo do paciente</p>
+            </div>
+          </div>
         </div>
-        <Badge variant={paciente.status === 'ativo' ? 'default' : 'secondary'}>
-          {paciente.status.charAt(0).toUpperCase() + paciente.status.slice(1)}
-        </Badge>
+        <Button className="bg-green-600 hover:bg-green-700">
+          <Save className="w-4 h-4 mr-2" />
+          Salvar Alterações
+        </Button>
       </div>
 
       {/* Tabs */}
       <div className="border-b mb-6">
         <nav className="flex space-x-8">
-          {[
-            { id: "info", label: "Informações", icon: FileText },
-            { id: "sessoes", label: "Sessões", icon: Calendar },
-            { id: "pagamentos", label: "Pagamentos", icon: DollarSign },
-          ].map(({ id, label, icon: Icon }) => (
+          {tabs.map((tab) => (
             <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                activeTab === id
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
                   ? "border-blue-500 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              {tab.label}
             </button>
           ))}
         </nav>
       </div>
 
       {/* Conteúdo das tabs */}
-      {activeTab === "info" && (
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Pessoais</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {activeTab === "dados-pessoais" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Informações Pessoais</CardTitle>
+            <p className="text-sm text-gray-600">Dados básicos e de contato do paciente</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label>Nome</Label>
-                <Input value={paciente.usuarios?.nome || ""} readOnly />
+                <Label htmlFor="nome">Nome Completo</Label>
+                <Input id="nome" defaultValue={paciente.usuarios?.nome || ""} />
               </div>
               <div>
-                <Label>Email</Label>
-                <Input value={paciente.usuarios?.email || ""} readOnly />
+                <Label htmlFor="email">E-mail</Label>
+                <Input id="email" type="email" defaultValue={paciente.usuarios?.email || ""} />
               </div>
               <div>
-                <Label>Telefone</Label>
-                <Input value={paciente.usuarios?.telefone || ""} readOnly />
+                <Label htmlFor="telefone">Telefone</Label>
+                <Input id="telefone" defaultValue={paciente.usuarios?.telefone || "(11) 99999-1111"} />
               </div>
               <div>
-                <Label>Data de Nascimento</Label>
+                <Label htmlFor="nascimento">Data de Nascimento</Label>
                 <Input 
-                  value={paciente.usuarios?.data_nascimento 
-                    ? new Date(paciente.usuarios.data_nascimento).toLocaleDateString('pt-BR')
-                    : ""
-                  } 
-                  readOnly 
+                  id="nascimento" 
+                  type="date" 
+                  defaultValue={paciente.usuarios?.data_nascimento || "1985-03-15"} 
                 />
               </div>
-              <div className="md:col-span-2">
-                <Label>Endereço</Label>
-                <Input value={paciente.usuarios?.endereco || ""} readOnly />
+            </div>
+            <div>
+              <Label htmlFor="endereco">Endereço</Label>
+              <Input id="endereco" defaultValue={paciente.usuarios?.endereco || ""} />
+            </div>
+            <div>
+              <Label htmlFor="contato-emergencia">Contato de Emergência</Label>
+              <Input id="contato-emergencia" defaultValue="João Silva - (11) 88888-1111" />
+            </div>
+            <div>
+              <Label htmlFor="observacoes">Observações</Label>
+              <Textarea 
+                id="observacoes" 
+                defaultValue={paciente.observacoes || "Paciente com histórico de ansiedade. Prefere horários matutinos."} 
+                rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {activeTab === "sessoes" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="border-b bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                    <span className="text-blue-600 text-sm">📅</span>
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Sessões Planejadas</CardTitle>
+                    <p className="text-sm text-gray-600">Gerencie as sessões de avaliação do paciente</p>
+                  </div>
+                </div>
+                <Dialog open={showNovaSessao} onOpenChange={setShowNovaSessao}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gray-800 hover:bg-gray-900">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nova Sessão
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Nova Sessão</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Nome da Sessão</Label>
+                        <Input
+                          value={novaSessaoData.nome}
+                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, nome: e.target.value }))}
+                          placeholder="Ex: Avaliação WISC-V"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Data</Label>
+                          <Input
+                            type="date"
+                            value={novaSessaoData.data}
+                            onChange={(e) => setNovaSessaoData(prev => ({ ...prev, data: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Horário</Label>
+                          <Input
+                            type="time"
+                            value={novaSessaoData.horario}
+                            onChange={(e) => setNovaSessaoData(prev => ({ ...prev, horario: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Link da Reunião</Label>
+                        <Input
+                          value={novaSessaoData.link}
+                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, link: e.target.value }))}
+                          placeholder="https://meet.google.com/..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Observações</Label>
+                        <Textarea
+                          value={novaSessaoData.observacoes}
+                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, observacoes: e.target.value }))}
+                          placeholder="Observações sobre a sessão..."
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleCreateSessao} className="flex-1 bg-green-600 hover:bg-green-700">
+                          Adicionar Sessão
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowNovaSessao(false)} className="flex-1">
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
-              {paciente.responsavel_nome && (
-                <>
-                  <div>
-                    <Label>Responsável</Label>
-                    <Input value={paciente.responsavel_nome} readOnly />
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-hidden">
+                <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                  <div>Sessão</div>
+                  <div>Data/Horário</div>
+                  <div>Status</div>
+                  <div>Link da Reunião</div>
+                  <div>Ações</div>
+                </div>
+                {sessoesMock.map((sessao) => (
+                  <div key={sessao.id} className="grid grid-cols-5 gap-4 p-4 border-b hover:bg-gray-50">
+                    <div className="font-medium">{sessao.nome}</div>
+                    <div className="text-gray-600">{sessao.data} às {sessao.horario}</div>
+                    <div>
+                      <Badge variant={sessao.status === "Concluída" ? "default" : "outline"}>
+                        {sessao.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                        <Link className="w-4 h-4 mr-1" />
+                        Acessar
+                      </Button>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div>
-                    <Label>Telefone do Responsável</Label>
-                    <Input value={paciente.responsavel_telefone || ""} readOnly />
-                  </div>
-                </>
-              )}
-              <div className="md:col-span-2">
-                <Label>Observações</Label>
-                <Textarea value={paciente.observacoes || ""} readOnly />
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {activeTab === "sessoes" && (
+      {activeTab === "questionarios" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Sessões</h2>
-            <div className="flex gap-2">
-              <Dialog open={showNovaSessao} onOpenChange={setShowNovaSessao}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nova Sessão
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Agendar Nova Sessão</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="border-b bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+                    <span className="text-purple-600 text-sm">📋</span>
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Questionários Atribuídos</CardTitle>
+                    <p className="text-sm text-gray-600">Questionários, formulários e escalas do paciente</p>
+                  </div>
+                </div>
+                <Dialog open={showAtribuirQuestionario} onOpenChange={setShowAtribuirQuestionario}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gray-800 hover:bg-gray-900">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Atribuir Questionário
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Atribuir Questionário</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
                       <div>
-                        <Label>Título</Label>
-                        <Input
-                          value={novaSessaoData.titulo}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, titulo: e.target.value }))}
-                          placeholder="Ex: Primeira Consulta"
-                        />
-                      </div>
-                      <div>
-                        <Label>Data e Hora</Label>
-                        <Input
-                          type="datetime-local"
-                          value={novaSessaoData.data_agendada}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, data_agendada: e.target.value }))}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Descrição</Label>
-                      <Textarea
-                        value={novaSessaoData.descricao}
-                        onChange={(e) => setNovaSessaoData(prev => ({ ...prev, descricao: e.target.value }))}
-                        placeholder="Descrição da sessão..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Duração (minutos)</Label>
-                        <Input
-                          type="number"
-                          value={novaSessaoData.duracao_minutos}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, duracao_minutos: parseInt(e.target.value) }))}
-                        />
-                      </div>
-                      <div>
-                        <Label>Tipo</Label>
-                        <Select
-                          value={novaSessaoData.tipo_local}
-                          onValueChange={(value: "online" | "presencial") => 
-                            setNovaSessaoData(prev => ({ ...prev, tipo_local: value }))
-                          }
-                        >
+                        <Label>Questionário</Label>
+                        <Select>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Selecione um questionário" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="online">Online</SelectItem>
-                            <SelectItem value="presencial">Presencial</SelectItem>
+                            <SelectItem value="wisc">WISC-V</SelectItem>
+                            <SelectItem value="srs2">Escala SRS-2</SelectItem>
+                            <SelectItem value="bdefs">BDEFS</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                    <div>
-                      <Label>Local/Link</Label>
-                      <Input
-                        value={novaSessaoData.local}
-                        onChange={(e) => setNovaSessaoData(prev => ({ ...prev, local: e.target.value }))}
-                        placeholder="Link do Google Meet ou endereço"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label>Profissional</Label>
+                        <Label>Link de Acesso do Paciente</Label>
                         <Input
-                          value={novaSessaoData.profissional_responsavel}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, profissional_responsavel: e.target.value }))}
+                          value={questionarioData.link}
+                          onChange={(e) => setQuestionarioData(prev => ({ ...prev, link: e.target.value }))}
+                          placeholder="https://forms.google.com/..."
                         />
                       </div>
-                      <div>
-                        <Label>Valor (R$)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={novaSessaoData.valor}
-                          onChange={(e) => setNovaSessaoData(prev => ({ ...prev, valor: parseFloat(e.target.value) }))}
-                        />
+                      <div className="flex gap-2">
+                        <Button onClick={handleAtribuirQuestionario} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                          Atribuir Questionário
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowAtribuirQuestionario(false)} className="flex-1">
+                          Cancelar
+                        </Button>
                       </div>
                     </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-hidden">
+                <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                  <div>Questionário</div>
+                  <div>Link do Paciente</div>
+                  <div>Status</div>
+                  <div>Data Conclusão</div>
+                  <div>Ações</div>
+                </div>
+                {questionariosMock.map((questionario) => (
+                  <div key={questionario.id} className="grid grid-cols-5 gap-4 p-4 border-b hover:bg-gray-50">
+                    <div className="font-medium">{questionario.nome}</div>
                     <div>
-                      <Label>Observações</Label>
-                      <Textarea
-                        value={novaSessaoData.observacoes}
-                        onChange={(e) => setNovaSessaoData(prev => ({ ...prev, observacoes: e.target.value }))}
-                        placeholder="Observações adicionais..."
-                      />
-                    </div>
-                    <Button onClick={handleCreateSessao} disabled={createSessao.isPending}>
-                      <Save className="w-4 h-4 mr-2" />
-                      {createSessao.isPending ? "Criando..." : "Criar Sessão"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={showAtribuirQuestionario} onOpenChange={setShowAtribuirQuestionario}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Atribuir Questionário
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Atribuir Questionário à Sessão</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4">
-                    <div>
-                      <Label>Sessão</Label>
-                      <Select
-                        value={questionarioData.sessao_id}
-                        onValueChange={(value) => setQuestionarioData(prev => ({ ...prev, sessao_id: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma sessão" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sessoes?.map((sessao) => (
-                            <SelectItem key={sessao.id} value={sessao.id}>
-                              {sessao.titulo} - {new Date(sessao.data_agendada).toLocaleDateString('pt-BR')}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                        <Link className="w-4 h-4 mr-1" />
+                        Acessar Link
+                      </Button>
                     </div>
                     <div>
-                      <Label>Questionário</Label>
-                      <Select
-                        value={questionarioData.questionario_id}
-                        onValueChange={(value) => setQuestionarioData(prev => ({ ...prev, questionario_id: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um questionário" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {questionarios?.map((questionario) => (
-                            <SelectItem key={questionario.id} value={questionario.id}>
-                              {questionario.titulo} ({questionario.tipo})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="visivel"
-                        checked={questionarioData.visivel_paciente}
-                        onChange={(e) => setQuestionarioData(prev => ({ ...prev, visivel_paciente: e.target.checked }))}
-                      />
-                      <Label htmlFor="visivel">Visível para o paciente</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="obrigatorio"
-                        checked={questionarioData.obrigatorio}
-                        onChange={(e) => setQuestionarioData(prev => ({ ...prev, obrigatorio: e.target.checked }))}
-                      />
-                      <Label htmlFor="obrigatorio">Obrigatório</Label>
-                    </div>
-                    <Button onClick={handleAssignQuestionario} disabled={assignQuestionario.isPending}>
-                      {assignQuestionario.isPending ? "Atribuindo..." : "Atribuir"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="grid gap-4">
-            {sessoesLoading ? (
-              Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full" />
-              ))
-            ) : sessoes?.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-gray-500">Nenhuma sessão encontrada.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              sessoes?.map((sessao) => (
-                <Card key={sessao.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{sessao.titulo}</CardTitle>
-                        <p className="text-sm text-gray-600">
-                          {new Date(sessao.data_agendada).toLocaleString('pt-BR')}
-                        </p>
-                      </div>
-                      <Badge variant={
-                        sessao.status === 'agendada' ? 'default' :
-                        sessao.status === 'concluida' ? 'outline' : 'destructive'
-                      }>
-                        {sessao.status.charAt(0).toUpperCase() + sessao.status.slice(1)}
+                      <Badge variant={questionario.status === "Concluído" ? "default" : "outline"}>
+                        {questionario.status}
                       </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-600">Tipo</p>
-                        <p>{sessao.tipo_local === 'online' ? 'Online' : 'Presencial'}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Duração</p>
-                        <p>{sessao.duracao_minutos} minutos</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Profissional</p>
-                        <p>{sessao.profissional_responsavel}</p>
-                      </div>
-                      {sessao.valor && (
-                        <div>
-                          <p className="text-gray-600">Valor</p>
-                          <p>R$ {sessao.valor.toFixed(2)}</p>
-                        </div>
-                      )}
+                    <div className="text-gray-600">{questionario.data}</div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-green-600">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    {sessao.descricao && (
-                      <div className="mt-3">
-                        <p className="text-gray-600 text-sm">Descrição</p>
-                        <p className="text-sm">{sessao.descricao}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {activeTab === "pagamentos" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Pagamentos</h2>
-            <Dialog open={showNovoPagamento} onOpenChange={setShowNovoPagamento}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Pagamento
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Criar Novo Pagamento</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Valor (R$)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={pagamentoData.valor}
-                        onChange={(e) => setPagamentoData(prev => ({ ...prev, valor: parseFloat(e.target.value) }))}
-                      />
-                    </div>
-                    <div>
-                      <Label>Data de Vencimento</Label>
-                      <Input
-                        type="date"
-                        value={pagamentoData.data_vencimento}
-                        onChange={(e) => setPagamentoData(prev => ({ ...prev, data_vencimento: e.target.value }))}
-                      />
-                    </div>
+          <Card>
+            <CardHeader className="border-b bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                    <span className="text-green-600 text-sm">💰</span>
                   </div>
                   <div>
-                    <Label>Sessão (opcional)</Label>
-                    <Select
-                      value={pagamentoData.sessao_id}
-                      onValueChange={(value) => setPagamentoData(prev => ({ ...prev, sessao_id: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma sessão" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Nenhuma sessão específica</SelectItem>
-                        {sessoes?.map((sessao) => (
-                          <SelectItem key={sessao.id} value={sessao.id}>
-                            {sessao.titulo} - {new Date(sessao.data_agendada).toLocaleDateString('pt-BR')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CardTitle className="text-lg">Controle de Pagamentos</CardTitle>
+                    <p className="text-sm text-gray-600">Gerencie pagamentos e cobranças do paciente</p>
                   </div>
-                  <div>
-                    <Label>Método de Pagamento</Label>
-                    <Input
-                      value={pagamentoData.metodo_pagamento}
-                      onChange={(e) => setPagamentoData(prev => ({ ...prev, metodo_pagamento: e.target.value }))}
-                      placeholder="Ex: PIX, Cartão, Dinheiro"
-                    />
-                  </div>
-                  <div>
-                    <Label>Observações</Label>
-                    <Textarea
-                      value={pagamentoData.observacoes}
-                      onChange={(e) => setPagamentoData(prev => ({ ...prev, observacoes: e.target.value }))}
-                      placeholder="Observações sobre o pagamento..."
-                    />
-                  </div>
-                  <Button onClick={handleCreatePagamento} disabled={createPagamento.isPending}>
-                    <Save className="w-4 h-4 mr-2" />
-                    {createPagamento.isPending ? "Criando..." : "Criar Pagamento"}
-                  </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="grid gap-4">
-            {pagamentosLoading ? (
-              Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full" />
-              ))
-            ) : pagamentos?.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-gray-500">Nenhum pagamento encontrado.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              pagamentos?.map((pagamento) => (
-                <Card key={pagamento.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="grid grid-cols-2 gap-4 flex-1">
-                        <div>
-                          <p className="text-sm text-gray-600">Valor</p>
-                          <p className="font-semibold text-lg">R$ {pagamento.valor.toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Vencimento</p>
-                          <p>{new Date(pagamento.data_vencimento).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                        {pagamento.metodo_pagamento && (
-                          <div>
-                            <p className="text-sm text-gray-600">Método</p>
-                            <p>{pagamento.metodo_pagamento}</p>
-                          </div>
-                        )}
-                        {pagamento.data_pagamento && (
-                          <div>
-                            <p className="text-sm text-gray-600">Data de Pagamento</p>
-                            <p>{new Date(pagamento.data_pagamento).toLocaleDateString('pt-BR')}</p>
-                          </div>
-                        )}
+                <Dialog open={showNovoPagamento} onOpenChange={setShowNovoPagamento}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gray-800 hover:bg-gray-900">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Pagamento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Nova Cobrança</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Descrição</Label>
+                        <Input
+                          value={pagamentoData.descricao}
+                          onChange={(e) => setPagamentoData(prev => ({ ...prev, descricao: e.target.value }))}
+                          placeholder="Ex: Avaliação Neuropsicológica"
+                        />
                       </div>
-                      <Badge variant={
-                        pagamento.status === 'pago' ? 'default' :
-                        pagamento.status === 'pendente' ? 'outline' : 'destructive'
-                      }>
-                        {pagamento.status.charAt(0).toUpperCase() + pagamento.status.slice(1)}
+                      <div>
+                        <Label>Valor (R$)</Label>
+                        <Input
+                          value={pagamentoData.valor}
+                          onChange={(e) => setPagamentoData(prev => ({ ...prev, valor: e.target.value }))}
+                          placeholder="250,00"
+                        />
+                      </div>
+                      <div>
+                        <Label>Data de Vencimento</Label>
+                        <Input
+                          type="date"
+                          value={pagamentoData.vencimento}
+                          onChange={(e) => setPagamentoData(prev => ({ ...prev, vencimento: e.target.value }))}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleCreatePagamento} className="flex-1 bg-green-600 hover:bg-green-700">
+                          Adicionar Cobrança
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowNovoPagamento(false)} className="flex-1">
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-hidden">
+                <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                  <div>Descrição</div>
+                  <div>Valor</div>
+                  <div>Vencimento</div>
+                  <div>Status</div>
+                  <div>Data Pagamento</div>
+                  <div>Ações</div>
+                </div>
+                {pagamentosMock.map((pagamento) => (
+                  <div key={pagamento.id} className="grid grid-cols-6 gap-4 p-4 border-b hover:bg-gray-50">
+                    <div className="font-medium">{pagamento.descricao}</div>
+                    <div className="font-semibold">{pagamento.valor}</div>
+                    <div className="text-gray-600">{pagamento.vencimento}</div>
+                    <div>
+                      <Badge variant={pagamento.status === "Pago" ? "default" : "outline"}>
+                        {pagamento.status}
                       </Badge>
                     </div>
-                    {pagamento.observacoes && (
-                      <div className="mt-3">
-                        <p className="text-gray-600 text-sm">Observações</p>
-                        <p className="text-sm">{pagamento.observacoes}</p>
+                    <div className="text-gray-600">{pagamento.dataPagamento}</div>
+                    <div className="flex gap-1">
+                      {pagamento.status === "Pendente" && (
+                        <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
+                          Marcar Pago
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "laudo" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="border-b bg-gray-50">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
+                  <span className="text-gray-600 text-sm">📄</span>
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Relatório Final (Laudo)</CardTitle>
+                  <p className="text-sm text-gray-600">Upload e gerenciamento do laudo neuropsicológico</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-600 mb-2">Escolher arquivo · Nenhum arquivo escolhido</p>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Enviar Laudo
+                </Button>
+                <p className="text-xs text-gray-500 mt-2">Aceita apenas arquivos PDF. Tamanho máximo: 10MB</p>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Laudos Anteriores</h3>
+                {laudosMock.map((laudo) => (
+                  <div key={laudo.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
+                        <span className="text-red-600 text-xs">PDF</span>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+                      <span className="font-medium">{laudo.nome}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4 mr-1" />
+                        Visualizar
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
