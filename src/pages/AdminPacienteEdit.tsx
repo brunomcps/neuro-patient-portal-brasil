@@ -36,7 +36,8 @@ const AdminPacienteEdit = () => {
     modalidade: "online",
     link: "",
     endereco: "",
-    observacoes: ""
+    observacoes: "",
+    questionarios_selecionados: [] as number[]
   });
 
   const [editSessaoData, setEditSessaoData] = useState({
@@ -46,10 +47,25 @@ const AdminPacienteEdit = () => {
     modalidade: "online",
     link: "",
     endereco: "",
-    observacoes: ""
+    observacoes: "",
+    questionarios_selecionados: [] as number[]
   });
 
   const [statusSessaoData, setStatusSessaoData] = useState({
+    status: "",
+    observacoes: ""
+  });
+
+  // Estados para gerenciar questionários
+  const [showEditQuestionario, setShowEditQuestionario] = useState(false);
+  const [showStatusQuestionario, setShowStatusQuestionario] = useState(false);
+  const [selectedQuestionario, setSelectedQuestionario] = useState<any>(null);
+  const [editQuestionarioData, setEditQuestionarioData] = useState({
+    questionario: "",
+    link: "",
+    observacoes: ""
+  });
+  const [statusQuestionarioData, setStatusQuestionarioData] = useState({
     status: "",
     observacoes: ""
   });
@@ -105,6 +121,15 @@ const AdminPacienteEdit = () => {
   };
 
   // Mock data para demonstração
+  const questionariosDisponiveis = [
+    { id: 1, nome: "Formulário Inicial", tipo: "Formulário", tempo: "15 min" },
+    { id: 2, nome: "Escala SRS-2", tipo: "Escala", tempo: "20 min" },
+    { id: 3, nome: "BDEFS", tipo: "Escala", tempo: "25 min" },
+    { id: 4, nome: "WISC-V", tipo: "Teste Neuropsicológico", tempo: "90 min" },
+    { id: 5, nome: "TEA-Ch", tipo: "Teste Neuropsicológico", tempo: "45 min" },
+    { id: 6, nome: "Inventário Beck de Ansiedade", tipo: "Inventário", tempo: "10 min" }
+  ];
+
   const sessoesMock = [
     { 
       id: 1, 
@@ -166,7 +191,7 @@ const AdminPacienteEdit = () => {
     console.log("Criando sessão:", novaSessaoData);
     toast.success("Sessão criada com sucesso!");
     setShowNovaSessao(false);
-    setNovaSessaoData({ nome: "", data: "", horario: "", modalidade: "online", link: "", endereco: "", observacoes: "" });
+    setNovaSessaoData({ nome: "", data: "", horario: "", modalidade: "online", link: "", endereco: "", observacoes: "", questionarios_selecionados: [] });
   };
 
   const handleAtribuirQuestionario = () => {
@@ -193,7 +218,8 @@ const AdminPacienteEdit = () => {
       modalidade: sessao.modalidade,
       link: sessao.link || "",
       endereco: sessao.endereco || "",
-      observacoes: sessao.observacoes || ""
+      observacoes: sessao.observacoes || "",
+      questionarios_selecionados: sessao.questionarios_selecionados || []
     });
     setShowEditSessao(true);
   };
@@ -248,15 +274,45 @@ const AdminPacienteEdit = () => {
     }
   };
 
-  // Handlers para editar e deletar questionário (mock)
+  // Handlers para editar e deletar questionário
   const handleEditQuestionario = (questionario) => {
-    console.log("Editando questionário:", questionario);
-    toast.info(`Editando questionário ${questionario.nome}`);
+    setSelectedQuestionario(questionario);
+    setEditQuestionarioData({
+      questionario: questionario.nome,
+      link: questionario.link,
+      observacoes: questionario.observacoes || ""
+    });
+    setShowEditQuestionario(true);
+  };
+
+  const handleStatusQuestionario = (questionario) => {
+    setSelectedQuestionario(questionario);
+    setStatusQuestionarioData({
+      status: questionario.status,
+      observacoes: ""
+    });
+    setShowStatusQuestionario(true);
   };
 
   const handleDeleteQuestionario = (questionario) => {
-    console.log("Deletando questionário:", questionario);
-    toast.warning(`Questionário ${questionario.nome} removido`);
+    if (confirm(`Tem certeza que deseja remover o questionário "${questionario.nome}"?`)) {
+      console.log("Deletando questionário:", questionario);
+      toast.success(`Questionário ${questionario.nome} removido com sucesso`);
+    }
+  };
+
+  const handleSaveEditQuestionario = () => {
+    console.log("Salvando edição do questionário:", editQuestionarioData);
+    toast.success("Questionário atualizado com sucesso!");
+    setShowEditQuestionario(false);
+    setSelectedQuestionario(null);
+  };
+
+  const handleSaveStatusQuestionario = () => {
+    console.log("Atualizando status do questionário:", statusQuestionarioData);
+    toast.success("Status do questionário atualizado com sucesso!");
+    setShowStatusQuestionario(false);
+    setSelectedQuestionario(null);
   };
 
   // Handler para controle de pagamentos
@@ -552,6 +608,38 @@ const AdminPacienteEdit = () => {
                         </div>
                       )}
                       <div>
+                        <Label>Questionários e Testes para esta Sessão</Label>
+                        <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-4">
+                          {questionariosDisponiveis.map((questionario) => (
+                            <div key={questionario.id} className="flex items-center space-x-3 p-2 border rounded">
+                              <input
+                                type="checkbox"
+                                id={`questionario-${questionario.id}`}
+                                checked={novaSessaoData.questionarios_selecionados.includes(questionario.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setNovaSessaoData(prev => ({
+                                      ...prev,
+                                      questionarios_selecionados: [...prev.questionarios_selecionados, questionario.id]
+                                    }));
+                                  } else {
+                                    setNovaSessaoData(prev => ({
+                                      ...prev,
+                                      questionarios_selecionados: prev.questionarios_selecionados.filter(id => id !== questionario.id)
+                                    }));
+                                  }
+                                }}
+                                className="h-4 w-4"
+                              />
+                              <label htmlFor={`questionario-${questionario.id}`} className="flex-1 cursor-pointer">
+                                <div className="font-medium">{questionario.nome}</div>
+                                <div className="text-sm text-gray-600">{questionario.tipo} • {questionario.tempo}</div>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
                         <Label>Observações</Label>
                         <Textarea
                           value={novaSessaoData.observacoes}
@@ -753,8 +841,18 @@ const AdminPacienteEdit = () => {
                       <Button 
                         variant="ghost" 
                         size="sm" 
+                        className="text-gray-600 hover:text-blue-600"
+                        onClick={() => handleStatusQuestionario(questionario)}
+                        title="Alterar Status"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
                         className="text-gray-600 hover:text-green-600"
                         onClick={() => handleEditQuestionario(questionario)}
+                        title="Editar Questionário"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -763,6 +861,7 @@ const AdminPacienteEdit = () => {
                         size="sm" 
                         className="text-gray-600 hover:text-red-600"
                         onClick={() => handleDeleteQuestionario(questionario)}
+                        title="Remover Questionário"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -1022,6 +1121,39 @@ const AdminPacienteEdit = () => {
             )}
             
             <div>
+              <Label>Questionários e Testes para esta Sessão</Label>
+              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-4">
+                {questionariosDisponiveis.map((questionario) => (
+                  <div key={questionario.id} className="flex items-center space-x-3 p-2 border rounded">
+                    <input
+                      type="checkbox"
+                      id={`edit-questionario-${questionario.id}`}
+                      checked={editSessaoData.questionarios_selecionados.includes(questionario.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEditSessaoData(prev => ({
+                            ...prev,
+                            questionarios_selecionados: [...prev.questionarios_selecionados, questionario.id]
+                          }));
+                        } else {
+                          setEditSessaoData(prev => ({
+                            ...prev,
+                            questionarios_selecionados: prev.questionarios_selecionados.filter(id => id !== questionario.id)
+                          }));
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor={`edit-questionario-${questionario.id}`} className="flex-1 cursor-pointer">
+                      <div className="font-medium">{questionario.nome}</div>
+                      <div className="text-sm text-gray-600">{questionario.tipo} • {questionario.tempo}</div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
               <Label>Observações</Label>
               <Textarea
                 value={editSessaoData.observacoes}
@@ -1085,6 +1217,112 @@ const AdminPacienteEdit = () => {
                 Alterar Status
               </Button>
               <Button variant="outline" onClick={() => setShowStatusSessao(false)} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Edição de Questionário */}
+      <Dialog open={showEditQuestionario} onOpenChange={setShowEditQuestionario}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Questionário</DialogTitle>
+            <DialogDescription>
+              {selectedQuestionario && `Edite as informações do questionário "${selectedQuestionario.nome}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Questionário</Label>
+              <Select 
+                value={editQuestionarioData.questionario} 
+                onValueChange={(value) => setEditQuestionarioData(prev => ({ ...prev, questionario: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um questionário" />
+                </SelectTrigger>
+                <SelectContent>
+                  {questionariosDisponiveis.map((q) => (
+                    <SelectItem key={q.id} value={q.nome}>{q.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Link de Acesso</Label>
+              <Input
+                value={editQuestionarioData.link}
+                onChange={(e) => setEditQuestionarioData(prev => ({ ...prev, link: e.target.value }))}
+                placeholder="https://forms.google.com/..."
+              />
+            </div>
+            <div>
+              <Label>Observações</Label>
+              <Textarea
+                value={editQuestionarioData.observacoes}
+                onChange={(e) => setEditQuestionarioData(prev => ({ ...prev, observacoes: e.target.value }))}
+                placeholder="Observações sobre o questionário..."
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveEditQuestionario} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditQuestionario(false)} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Alteração de Status do Questionário */}
+      <Dialog open={showStatusQuestionario} onOpenChange={setShowStatusQuestionario}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Alterar Status do Questionário</DialogTitle>
+            <DialogDescription>
+              {selectedQuestionario && `Altere o status do questionário "${selectedQuestionario.nome}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Novo Status</Label>
+              <Select 
+                value={statusQuestionarioData.status} 
+                onValueChange={(value) => setStatusQuestionarioData(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pendente">Pendente</SelectItem>
+                  <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                  <SelectItem value="Concluído">Concluído</SelectItem>
+                  <SelectItem value="Cancelado">Cancelado</SelectItem>
+                  <SelectItem value="Expirado">Expirado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Observações</Label>
+              <Textarea
+                value={statusQuestionarioData.observacoes}
+                onChange={(e) => setStatusQuestionarioData(prev => ({ ...prev, observacoes: e.target.value }))}
+                placeholder="Observações sobre a alteração de status..."
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveStatusQuestionario} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Save className="w-4 h-4 mr-2" />
+                Alterar Status
+              </Button>
+              <Button variant="outline" onClick={() => setShowStatusQuestionario(false)} className="flex-1">
                 Cancelar
               </Button>
             </div>
