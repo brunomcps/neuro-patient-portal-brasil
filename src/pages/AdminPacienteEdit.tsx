@@ -45,6 +45,40 @@ const AdminPacienteEdit = () => {
     vencimento: ""
   });
 
+  // Estado para upload de foto
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  // Handler para upload de foto
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error("Arquivo muito grande. Tamanho máximo: 5MB");
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast.error("Por favor, selecione apenas arquivos de imagem");
+        return;
+      }
+
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      toast.success("Foto carregada com sucesso!");
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    toast.info("Foto removida");
+  };
+
   // Mock data para demonstração
   const sessoesMock = [
     { id: 1, nome: "Sessão Inicial", data: "09/01/2024", horario: "14:00", status: "Concluída", link: "#" },
@@ -201,6 +235,65 @@ const AdminPacienteEdit = () => {
             <p className="text-sm text-gray-600">Dados básicos e de contato do paciente</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Seção de foto do paciente */}
+            <div className="flex flex-col items-center space-y-4 p-6 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+              <div className="relative group photo-upload">
+                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                  {photoPreview ? (
+                    <img 
+                      src={photoPreview} 
+                      alt="Foto do paciente" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-2xl">👤</span>
+                    </div>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 photo-overlay transition-opacity duration-200 cursor-pointer">
+                  <Upload className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              
+              <div className="text-center space-y-2">
+                <h3 className="font-medium text-gray-900">Foto do Paciente</h3>
+                <p className="text-sm text-gray-600">Clique para alterar a foto</p>
+                
+                <div className="flex gap-2 justify-center">
+                  <label htmlFor="photo-upload" className="cursor-pointer">
+                    <Button type="button" className="bg-blue-600 hover:bg-blue-700">
+                      <Upload className="w-4 h-4 mr-2" />
+                      {photoPreview ? 'Alterar Foto' : 'Adicionar Foto'}
+                    </Button>
+                  </label>
+                  {photoPreview && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleRemovePhoto}
+                      className="text-red-600 hover:text-red-700 hover:border-red-300"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remover
+                    </Button>
+                  )}
+                </div>
+                
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                
+                <p className="text-xs text-gray-500">
+                  Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="nome">Nome Completo</Label>
