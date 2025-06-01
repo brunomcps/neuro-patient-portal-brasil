@@ -96,6 +96,7 @@ const AdminPacienteEdit = () => {
     vencimento: "",
     sessao_id: "",
     metodo_pagamento: "",
+    status: "",
     observacoes: ""
   });
 
@@ -347,6 +348,7 @@ const AdminPacienteEdit = () => {
       vencimento: pagamento.vencimento,
       sessao_id: pagamento.sessao_id || "",
       metodo_pagamento: pagamento.metodo || "",
+      status: pagamento.status || "",
       observacoes: pagamento.observacoes || ""
     });
     setShowEditPaymentDialog(true);
@@ -1021,20 +1023,25 @@ const AdminPacienteEdit = () => {
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handlePaymentControl(pagamento)}
+                          onClick={() => handleEditPayment(pagamento)}
                           className="text-blue-600 border-blue-600 hover:bg-blue-50"
                         >
-                          <Settings className="w-4 h-4 mr-1" />
-                          Controlar
+                          <Edit className="w-4 h-4 mr-1" />
+                          Gerenciar
                         </Button>
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={() => handleEditPayment(pagamento)}
-                          className="text-green-600 border-green-600 hover:bg-green-50"
+                          onClick={() => {
+                            if (confirm(`Tem certeza que deseja remover o pagamento "${pagamento.descricao}"?`)) {
+                              console.log("Deletando pagamento:", pagamento);
+                              toast.success(`Pagamento ${pagamento.descricao} removido com sucesso`);
+                            }
+                          }}
+                          className="text-red-600 border-red-600 hover:bg-red-50"
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Editar
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Remover
                         </Button>
                       </div>
                     </div>
@@ -1391,129 +1398,66 @@ const AdminPacienteEdit = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de Controle de Pagamentos */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Controle de Pagamento</DialogTitle>
-            <DialogDescription>
-              Gerencie o status e informações do pagamento
-            </DialogDescription>
-          </DialogHeader>
-          {selectedPayment && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">{selectedPayment.descricao}</h4>
-                <p className="text-sm text-gray-600">Valor: R$ {selectedPayment.valor.toFixed(2)}</p>
-                <p className="text-sm text-gray-600">Vencimento: {selectedPayment.vencimento}</p>
-                {selectedPayment.sessao_nome && (
-                  <p className="text-sm text-gray-600">Sessão: {selectedPayment.sessao_nome}</p>
-                )}
-              </div>
+      
 
-              <div className="space-y-2">
-                <Label htmlFor="payment-status">Status do Pagamento</Label>
-                <Select onValueChange={setPaymentStatus}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione um status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="pendente">Pendente</SelectItem>
-                        <SelectItem value="pago">Pago</SelectItem>
-                        <SelectItem value="atrasado">Atrasado</SelectItem>
-                        <SelectItem value="cancelado">Cancelado</SelectItem>
-                    </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="payment-method">Método de Pagamento</Label>
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o método" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
-                    <SelectItem value="transferencia">Transferência Bancária</SelectItem>
-                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="payment-date">Data do Pagamento</Label>
-                <Input
-                  id="payment-date"
-                  type="date"
-                  placeholder="Data do pagamento"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="payment-notes">Observações</Label>
-                <Textarea
-                  id="payment-notes"
-                  placeholder="Observações sobre o pagamento..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button 
-                  onClick={handleSavePayment}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Salvar Alterações
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowPaymentDialog(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Edição de Pagamento */}
+      {/* Dialog de Gerenciamento de Pagamento */}
       <Dialog open={showEditPaymentDialog} onOpenChange={setShowEditPaymentDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Editar Pagamento</DialogTitle>
+            <DialogTitle>Gerenciar Pagamento</DialogTitle>
             <DialogDescription>
-              {selectedPayment && `Edite as informações do pagamento "${selectedPayment.descricao}"`}
+              {selectedPayment && `Gerencie todas as informações do pagamento "${selectedPayment.descricao}"`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Descrição</Label>
-              <Input
-                value={editPaymentData.descricao}
-                onChange={(e) => setEditPaymentData(prev => ({ ...prev, descricao: e.target.value }))}
-                placeholder="Ex: Avaliação Neuropsicológica"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Descrição</Label>
+                <Input
+                  value={editPaymentData.descricao}
+                  onChange={(e) => setEditPaymentData(prev => ({ ...prev, descricao: e.target.value }))}
+                  placeholder="Ex: Avaliação Neuropsicológica"
+                />
+              </div>
+              <div>
+                <Label>Valor (R$)</Label>
+                <Input
+                  value={editPaymentData.valor}
+                  onChange={(e) => setEditPaymentData(prev => ({ ...prev, valor: e.target.value }))}
+                  placeholder="250,00"
+                />
+              </div>
             </div>
-            <div>
-              <Label>Valor (R$)</Label>
-              <Input
-                value={editPaymentData.valor}
-                onChange={(e) => setEditPaymentData(prev => ({ ...prev, valor: e.target.value }))}
-                placeholder="250,00"
-              />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Data de Vencimento</Label>
+                <Input
+                  type="date"
+                  value={editPaymentData.vencimento.split('/').reverse().join('-')}
+                  onChange={(e) => setEditPaymentData(prev => ({ ...prev, vencimento: e.target.value.split('-').reverse().join('/') }))}
+                />
+              </div>
+              <div>
+                <Label>Status do Pagamento</Label>
+                <Select 
+                  value={editPaymentData.status} 
+                  onValueChange={(value) => setEditPaymentData(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="pago">Pago</SelectItem>
+                    <SelectItem value="atrasado">Atrasado</SelectItem>
+                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                    <SelectItem value="estornado">Estornado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label>Data de Vencimento</Label>
-              <Input
-                type="date"
-                value={editPaymentData.vencimento.split('/').reverse().join('-')}
-                onChange={(e) => setEditPaymentData(prev => ({ ...prev, vencimento: e.target.value.split('-').reverse().join('/') }))}
-              />
-            </div>
+
             <div>
               <Label>Sessão Relacionada</Label>
               <Select 
@@ -1524,15 +1468,27 @@ const AdminPacienteEdit = () => {
                   <SelectValue placeholder="Selecione uma sessão" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma sessão específica</SelectItem>
+                  <SelectItem value="none">Nenhuma sessão específica</SelectItem>
                   {sessoesMock.map((sessao) => (
                     <SelectItem key={sessao.id} value={sessao.id.toString()}>
-                      {sessao.nome} - {sessao.data}
+                      {sessao.nome} - {sessao.data} às {sessao.horario}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {editPaymentData.sessao_id && editPaymentData.sessao_id !== "none" && (
+                <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>Sessão selecionada:</strong> {sessoesMock.find(s => s.id.toString() === editPaymentData.sessao_id)?.nome} 
+                    <br />
+                    <span className="text-blue-600">
+                      {sessoesMock.find(s => s.id.toString() === editPaymentData.sessao_id)?.data} às {sessoesMock.find(s => s.id.toString() === editPaymentData.sessao_id)?.horario}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
+
             <div>
               <Label>Método de Pagamento</Label>
               <Select 
@@ -1552,16 +1508,18 @@ const AdminPacienteEdit = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <Label>Observações</Label>
               <Textarea
                 value={editPaymentData.observacoes}
                 onChange={(e) => setEditPaymentData(prev => ({ ...prev, observacoes: e.target.value }))}
-                placeholder="Observações sobre o pagamento..."
+                placeholder="Observações sobre o pagamento, comprovantes, detalhes específicos..."
                 rows={3}
               />
             </div>
-            <div className="flex gap-2">
+            
+            <div className="flex gap-2 pt-4">
               <Button onClick={handleSaveEditPayment} className="flex-1 bg-green-600 hover:bg-green-700">
                 <Save className="w-4 h-4 mr-2" />
                 Salvar Alterações
