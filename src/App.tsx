@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import AdminPacientes from "./pages/AdminPacientes";
 import AdminPacienteEdit from "./pages/AdminPacienteEdit";
 import AdminAgendamentos from "./pages/AdminAgendamentos";
 import AdminRelatorios from "./pages/AdminRelatorios";
+import AdminConfiguracoes from "./pages/AdminConfiguracoes";
 import AdminQuestionarios from "./pages/AdminQuestionarios";
 import AdminSessoes from "./pages/AdminSessoes";
 import Recursos from "./pages/Recursos";
@@ -40,6 +40,7 @@ const App = () => (
             <Route path="/admin/agendamentos" element={<AdminAgendamentos />} />
             <Route path="/admin/questionarios" element={<AdminQuestionarios />} />
             <Route path="/admin/relatorios" element={<AdminRelatorios />} />
+            <Route path="/admin/configuracoes" element={<AdminConfiguracoes />} />
             <Route path="/admin/sessoes" element={<AdminSessoes />} />
             <Route path="/paciente/pagamentos" element={<PacientePagamentos />} />
             <Route path="/paciente/sessoes" element={<PacienteSessoes />} />

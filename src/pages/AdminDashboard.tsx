@@ -366,7 +366,12 @@ const AdminDashboard = () => {
                   <Calendar className="h-4 w-4 mr-2" />
                   Configurar Agenda
                 </Button>
-                <Button size="sm" variant="outline" className="w-full justify-start">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate("/admin/configuracoes")}
+                >
                   <Settings className="h-4 w-4 mr-2" />
                   Configurações Gerais
                 </Button>
