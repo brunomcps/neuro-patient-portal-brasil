@@ -87,8 +87,17 @@ const AdminPacienteEdit = () => {
 
     // Estados para controle de pagamentos
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showEditPaymentDialog, setShowEditPaymentDialog] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState("pendente");
+  const [editPaymentData, setEditPaymentData] = useState({
+    descricao: "",
+    valor: "",
+    vencimento: "",
+    sessao_id: "",
+    metodo_pagamento: "",
+    observacoes: ""
+  });
 
   // Handler para upload de foto
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,9 +179,9 @@ const AdminPacienteEdit = () => {
   ];
 
   const pagamentosMock = [
-    { id: 1, descricao: "Sessão Inicial", valor: 250.00, vencimento: "09/01/2024", status: "pago", dataPagamento: "08/01/2024" , metodo: "PIX"},
-    { id: 2, descricao: "Avaliação Cognitiva", valor: 250.00, vencimento: "16/01/2024", status: "pago", dataPagamento: "15/01/2024", metodo: "Cartão de Crédito" },
-    { id: 3, descricao: "Testes Específicos", valor: 250.00, vencimento: "14/02/2024", status: "pendente", dataPagamento: "-", metodo: "Boleto" },
+    { id: 1, descricao: "Sessão Inicial", valor: 250.00, vencimento: "09/01/2024", status: "pago", dataPagamento: "08/01/2024" , metodo: "PIX", sessao_id: "1", sessao_nome: "Sessão Inicial"},
+    { id: 2, descricao: "Avaliação Cognitiva", valor: 250.00, vencimento: "16/01/2024", status: "pago", dataPagamento: "15/01/2024", metodo: "Cartão de Crédito", sessao_id: "2", sessao_nome: "Avaliação Cognitiva" },
+    { id: 3, descricao: "Testes Específicos", valor: 250.00, vencimento: "14/02/2024", status: "pendente", dataPagamento: "-", metodo: "Boleto", sessao_id: "3", sessao_nome: "Testes Específicos" },
   ];
 
   const laudosMock = [
@@ -327,6 +336,28 @@ const AdminPacienteEdit = () => {
     console.log("Salvando pagamento:", selectedPayment);
     toast.success("Pagamento atualizado com sucesso!");
     setShowPaymentDialog(false);
+  };
+
+  // Handler para editar pagamento
+  const handleEditPayment = (pagamento) => {
+    setSelectedPayment(pagamento);
+    setEditPaymentData({
+      descricao: pagamento.descricao,
+      valor: pagamento.valor.toString(),
+      vencimento: pagamento.vencimento,
+      sessao_id: pagamento.sessao_id || "",
+      metodo_pagamento: pagamento.metodo || "",
+      observacoes: pagamento.observacoes || ""
+    });
+    setShowEditPaymentDialog(true);
+  };
+
+  // Handler para salvar edição do pagamento
+  const handleSaveEditPayment = () => {
+    console.log("Salvando edição do pagamento:", editPaymentData);
+    toast.success("Pagamento editado com sucesso!");
+    setShowEditPaymentDialog(false);
+    setSelectedPayment(null);
   };
 
   if (pacienteLoading) {
@@ -924,6 +955,22 @@ const AdminPacienteEdit = () => {
                           onChange={(e) => setPagamentoData(prev => ({ ...prev, vencimento: e.target.value }))}
                         />
                       </div>
+                      <div>
+                        <Label>Sessão Relacionada (Opcional)</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma sessão" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Nenhuma sessão específica</SelectItem>
+                            {sessoesMock.map((sessao) => (
+                              <SelectItem key={sessao.id} value={sessao.id.toString()}>
+                                {sessao.nome} - {sessao.data}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="flex gap-2">
                         <Button onClick={handleCreatePagamento} className="flex-1 bg-green-600 hover:bg-green-700">
                           Adicionar Cobrança
@@ -964,6 +1011,11 @@ const AdminPacienteEdit = () => {
                         <div>
                           <span className="font-medium">Método:</span> {pagamento.metodo || "Não definido"}
                         </div>
+                        {pagamento.sessao_nome && (
+                          <div className="col-span-2">
+                            <span className="font-medium">Sessão:</span> {pagamento.sessao_nome}
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -974,6 +1026,15 @@ const AdminPacienteEdit = () => {
                         >
                           <Settings className="w-4 h-4 mr-1" />
                           Controlar
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleEditPayment(pagamento)}
+                          className="text-green-600 border-green-600 hover:bg-green-50"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Editar
                         </Button>
                       </div>
                     </div>
@@ -1345,6 +1406,9 @@ const AdminPacienteEdit = () => {
                 <h4 className="font-medium text-gray-900">{selectedPayment.descricao}</h4>
                 <p className="text-sm text-gray-600">Valor: R$ {selectedPayment.valor.toFixed(2)}</p>
                 <p className="text-sm text-gray-600">Vencimento: {selectedPayment.vencimento}</p>
+                {selectedPayment.sessao_nome && (
+                  <p className="text-sm text-gray-600">Sessão: {selectedPayment.sessao_nome}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -1413,6 +1477,100 @@ const AdminPacienteEdit = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Edição de Pagamento */}
+      <Dialog open={showEditPaymentDialog} onOpenChange={setShowEditPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Pagamento</DialogTitle>
+            <DialogDescription>
+              {selectedPayment && `Edite as informações do pagamento "${selectedPayment.descricao}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Descrição</Label>
+              <Input
+                value={editPaymentData.descricao}
+                onChange={(e) => setEditPaymentData(prev => ({ ...prev, descricao: e.target.value }))}
+                placeholder="Ex: Avaliação Neuropsicológica"
+              />
+            </div>
+            <div>
+              <Label>Valor (R$)</Label>
+              <Input
+                value={editPaymentData.valor}
+                onChange={(e) => setEditPaymentData(prev => ({ ...prev, valor: e.target.value }))}
+                placeholder="250,00"
+              />
+            </div>
+            <div>
+              <Label>Data de Vencimento</Label>
+              <Input
+                type="date"
+                value={editPaymentData.vencimento.split('/').reverse().join('-')}
+                onChange={(e) => setEditPaymentData(prev => ({ ...prev, vencimento: e.target.value.split('-').reverse().join('/') }))}
+              />
+            </div>
+            <div>
+              <Label>Sessão Relacionada</Label>
+              <Select 
+                value={editPaymentData.sessao_id} 
+                onValueChange={(value) => setEditPaymentData(prev => ({ ...prev, sessao_id: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma sessão" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Nenhuma sessão específica</SelectItem>
+                  {sessoesMock.map((sessao) => (
+                    <SelectItem key={sessao.id} value={sessao.id.toString()}>
+                      {sessao.nome} - {sessao.data}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Método de Pagamento</Label>
+              <Select 
+                value={editPaymentData.metodo_pagamento} 
+                onValueChange={(value) => setEditPaymentData(prev => ({ ...prev, metodo_pagamento: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o método" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                  <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                  <SelectItem value="transferencia">Transferência Bancária</SelectItem>
+                  <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                  <SelectItem value="boleto">Boleto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Observações</Label>
+              <Textarea
+                value={editPaymentData.observacoes}
+                onChange={(e) => setEditPaymentData(prev => ({ ...prev, observacoes: e.target.value }))}
+                placeholder="Observações sobre o pagamento..."
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveEditPayment} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Save className="w-4 h-4 mr-2" />
+                Salvar Alterações
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditPaymentDialog(false)} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
