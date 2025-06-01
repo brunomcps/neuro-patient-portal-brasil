@@ -14,6 +14,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Calendar, 
   Search,
@@ -120,19 +137,55 @@ const AdminAgendamentos = () => {
     setShowAddForm(false);
   };
 
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingAgendamento, setEditingAgendamento] = useState<any>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [agendamentoToDelete, setAgendamentoToDelete] = useState<any>(null);
+
   const handleEdit = (id: number) => {
-    toast({
-      title: "Editar agendamento",
-      description: "Funcionalidade de edição será implementada.",
-    });
+    const agendamento = agendamentos.find(a => a.id === id);
+    if (agendamento) {
+      setEditingAgendamento(agendamento);
+      setFormData({
+        paciente: agendamento.paciente,
+        data: agendamento.data,
+        horario: agendamento.horario,
+        tipo: agendamento.tipo,
+        link: agendamento.link
+      });
+      setShowEditForm(true);
+    }
   };
 
   const handleDelete = (id: number) => {
+    const agendamento = agendamentos.find(a => a.id === id);
+    if (agendamento) {
+      setAgendamentoToDelete(agendamento);
+      setShowDeleteDialog(true);
+    }
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     toast({
-      title: "Agendamento removido",
-      description: "Agendamento foi removido do sistema.",
-      variant: "destructive"
+      title: "Agendamento atualizado",
+      description: `Agendamento de ${formData.paciente} foi atualizado com sucesso.`,
     });
+    setFormData({ paciente: "", data: "", horario: "", tipo: "", link: "" });
+    setShowEditForm(false);
+    setEditingAgendamento(null);
+  };
+
+  const confirmDelete = () => {
+    if (agendamentoToDelete) {
+      toast({
+        title: "Agendamento removido",
+        description: `Agendamento de ${agendamentoToDelete.paciente} foi removido do sistema.`,
+        variant: "destructive"
+      });
+      setShowDeleteDialog(false);
+      setAgendamentoToDelete(null);
+    }
   };
 
   if (!user) return null;
@@ -250,6 +303,112 @@ const AdminAgendamentos = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Formulário de Edição */}
+        <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Agendamento</DialogTitle>
+              <DialogDescription>
+                Edite as informações do agendamento
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_paciente">Paciente</Label>
+                  <Input
+                    id="edit_paciente"
+                    value={formData.paciente}
+                    onChange={(e) => setFormData({...formData, paciente: e.target.value})}
+                    placeholder="Nome do paciente"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_tipo">Tipo de Sessão</Label>
+                  <select 
+                    className="w-full p-2 border border-gray-200 rounded-md"
+                    value={formData.tipo}
+                    onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                    required
+                  >
+                    <option value="">Selecione o tipo</option>
+                    {tipos.map(tipo => (
+                      <option key={tipo} value={tipo}>{tipo}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_data">Data</Label>
+                  <Input
+                    id="edit_data"
+                    type="date"
+                    value={formData.data}
+                    onChange={(e) => setFormData({...formData, data: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_horario">Horário</Label>
+                  <Input
+                    id="edit_horario"
+                    type="time"
+                    value={formData.horario}
+                    onChange={(e) => setFormData({...formData, horario: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit_link">Link da Reunião (opcional)</Label>
+                <Input
+                  id="edit_link"
+                  type="url"
+                  value={formData.link}
+                  onChange={(e) => setFormData({...formData, link: e.target.value})}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Salvar Alterações
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowEditForm(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de Confirmação de Exclusão */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o agendamento de {agendamentoToDelete?.paciente}? 
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Card className="border-blue-100">
           <CardHeader>
